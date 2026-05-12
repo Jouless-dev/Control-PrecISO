@@ -1,0 +1,10 @@
+# Notas locales (pueden contener contraseñas o credenciales)
+notas.txt
+**/notas.txt
+
+# Sistema / editor
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/

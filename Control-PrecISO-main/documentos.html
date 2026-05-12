@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documentos - Control PrecISO</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card-custom {
+            background: white;
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .card-custom .card-header {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: #485755;
+        }
+        .documento-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+        .documento-item:hover {
+            transform: translateX(5px);
+            background: #e9ecef;
+        }
+        .documento-nombre {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .documento-icono {
+            font-size: 1.5rem;
+        }
+        .btn-descargar {
+            background: #485755;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-descargar:hover {
+            background: #2d3a38;
+            color: white;
+        }
+        .categoria-titulo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #485755;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid px-4 py-3">
+        <!-- Header -->
+        <div class="page-header">
+            <h2 class="mb-1">📚 Biblioteca de Documentos</h2>
+            <p class="text-muted mb-0">Formatos, plantillas y guías para la implementación de ISO 27001:2022</p>
+        </div>
+
+        <!-- Formatos -->
+        <div class="card-custom">
+            <div class="card-header">📋 Formatos y Plantillas</div>
+            <div class="card-body">
+                <div class="documento-item">
+                    <div class="documento-nombre">
+                        <span class="documento-icono">📄</span>
+                        <span>Lista maestra de documentos</span>
+                    </div>
+                    <a href="documentos/Lista+Maestra+de+Documentos+del+SGSI.xlsx" download class="btn-descargar">
+                        📥 Descargar PDF
+                    </a>
+                </div>
+               
+</body>
+</html>
