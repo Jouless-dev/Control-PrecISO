@@ -1,0 +1,23 @@
+﻿=== Verificacion entorno (2026-05-12) ===
+Python: Python 3.14.5
+.Trim()
+pip: pip 26.1.1 from D:\Software\Lib\site-packages\pip (python 3.14)
+
+.Trim()
+Node.js: v24.15.0
+.Trim()
+Java: java : openjdk version "25.0.3" 2026-04-21 LTS
+En C:\Users\jadgc\AppData\Local\Temp\ps-script-f334bd8d-cba0-490c-96af-4730f8fff31d.ps1: 82 Carácter: 429
++ ... ) | Out-String).Trim()"; $out += "Java: $((java -version 2>&1) | Out- ...
++                                                ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (openjdk version "25.0.3" 2026-04-21 LTS:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+OpenJDK Runtime Environment Temurin-25.0.3+9 (build 25.0.3+9-LTS)
+OpenJDK 64-Bit Server VM Temurin-25.0.3+9 (build 25.0.3+9-LTS, mixed mode, sharing)
+.Trim()
+Semgrep: 1.162.0
+.Trim()
+Gitleaks: 8.30.1
+.Trim()
+OWASP Dependency-Check: 12.2.2 (CLI en security-analysis/dependency-check-tool)

@@ -1,0 +1,3 @@
+# CLI y distribución OWASP Dependency-Check (se regeneran localmente; ~160+ MB)
+dependency-check-tool/
+dependency-check-dist.zip
