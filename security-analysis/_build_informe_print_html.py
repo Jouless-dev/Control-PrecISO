@@ -1,19 +1,11 @@
-"""Genera INFORME_VULNERABILIDADES_print.html a partir del .md (una sola ejecución)."""
+"""Genera HTML listo para imprimir a PDF (A4) a partir de archivos Markdown en esta carpeta."""
 from pathlib import Path
 
 import markdown
 
 ROOT = Path(__file__).resolve().parent
-md_path = ROOT / "INFORME_VULNERABILIDADES.md"
-out_path = ROOT / "INFORME_VULNERABILIDADES_print.html"
 
-md = md_path.read_text(encoding="utf-8")
-body = markdown.markdown(
-    md,
-    extensions=["tables", "fenced_code", "nl2br", "sane_lists"],
-)
-
-css = """
+CSS = """
 :root { color-scheme: light; }
 * { box-sizing: border-box; }
 html { font-size: 11pt; }
@@ -103,19 +95,28 @@ ul, ol { padding-left: 1.2em; }
 }
 """
 
-html = f"""<!DOCTYPE html>
+
+def build_print_html(md_file: str, html_file: str, page_title: str) -> Path:
+    md_path = ROOT / md_file
+    out_path = ROOT / html_file
+    md = md_path.read_text(encoding="utf-8")
+    body = markdown.markdown(
+        md,
+        extensions=["tables", "fenced_code", "nl2br", "sane_lists"],
+    )
+    html = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Informe de análisis de vulnerabilidades — Control-PrecISO</title>
-  <style>{css}</style>
+  <title>{page_title}</title>
+  <style>{CSS}</style>
 </head>
 <body>
   <div class="print-hint screen-only">
     <strong>Exportar a PDF:</strong> use <kbd>Ctrl+P</kbd> (Windows) o el menú Imprimir →
     <strong>Guardar como PDF</strong> / <strong>Microsoft Print to PDF</strong>.
-    Este archivo está optimizado para papel A4.
+    Documento optimizado para papel A4.
   </div>
   <article class="informe">
 {body}
@@ -123,6 +124,23 @@ html = f"""<!DOCTYPE html>
 </body>
 </html>
 """
+    out_path.write_text(html, encoding="utf-8")
+    return out_path
 
-out_path.write_text(html, encoding="utf-8")
-print(f"OK -> {out_path}")
+
+if __name__ == "__main__":
+    docs = [
+        (
+            "INFORME_VULNERABILIDADES.md",
+            "INFORME_VULNERABILIDADES_print.html",
+            "Informe de análisis de vulnerabilidades — Control-PrecISO",
+        ),
+        (
+            "PLAN_REMEDIACION.md",
+            "PLAN_REMEDIACION_print.html",
+            "Plan de remediación — Control-PrecISO",
+        ),
+    ]
+    for md_file, html_file, title in docs:
+        p = build_print_html(md_file, html_file, title)
+        print(f"OK -> {p}")
