@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestión de Riesgos - Control PrecISO</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card-custom {
+            background: white;
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .card-custom .card-header {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: #485755;
+            border-radius: 16px 16px 0 0;
+        }
+        .card-custom .card-body {
+            padding: 1.5rem;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            padding: 0.6rem 1rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #485755;
+            box-shadow: 0 0 0 0.2rem rgba(72,87,85,0.1);
+        }
+        .btn-primary {
+            background: #485755;
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+        }
+        .btn-primary:hover {
+            background: #2d3a38;
+        }
+        .activo-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .activo-codigo {
+            font-weight: 600;
+            color: #485755;
+        }
+        .badge-tipo {
+            background: #e9ecef;
+            color: #485755;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 1rem;
+            border-radius: 12px;
+            display: none;
+            margin-bottom: 1rem;
+        }
+        .success-message {
+            background: #d1e7dd;
+            color: #0f5132;
+            padding: 1rem;
+            border-radius: 12px;
+            display: none;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #485755;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid px-4 py-3">
+        <!-- Header -->
+        <div class="page-header">
+            <h2 class="mb-1">📊 Gestión de Riesgos</h2>
+            <p class="text-muted mb-0">Gestione los activos de información y evalúe los riesgos asociados</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <!-- Panel de Activos -->
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="card-custom">
+                    <div class="card-header">📦 Activos de Información</div>
+                    <div class="card-body">
+                        <form id="activoForm">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <input type="text" id="codigo" class="form-control" placeholder="Código (ej: ACT-001)" required>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" id="nombre" class="form-control" placeholder="Nombre del activo" required>
+                                </div>
+                                <div class="col-6">
+                                    <select id="tipo" class="form-select" required>
+                                        <option value="">Tipo</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Hardware">Hardware</option>
+                                        <option value="Datos">Datos</option>
+                                        <option value="Personal">Personal</option>
+                                        <option value="Servicios">Servicios</option>
+                                        <option value="Infraestructura">Infraestructura</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" id="dueno" class="form-control" placeholder="Dueño">
+                                </div>
+                                <div class="col-12">
+                                    <input type="text" id="ubicacion" class="form-control" placeholder="Ubicación">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">+ Crear Activo</button>
+                        </form>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="section-title">Mis Activos</div>
+                        <div id="activosLoading" class="loading"><small>Cargando...</small></div>
+                        <div id="activosContainer"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel de Evaluación -->
+            <div class="col-lg-7">
+                <div class="card-custom">
+                    <div class="card-header">⚠️ Evaluar Riesgo</div>
+                    <div class="card-body">
+                        <form id="evaluarForm">
+                            <div class="row g-2 mb-3">
+                                <div class="col-12">
+                                    <select id="activo_id" class="form-select" required>
+                                        <option value="">Seleccionar Activo</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select id="amenaza_id" class="form-select" required>
+                                        <option value="">Amenaza</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select id="vulnerabilidad_id" class="form-select" required>
+                                        <option value="">Vulnerabilidad</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select id="probabilidad" class="form-select" required>
+                                        <option value="">Probabilidad</option>
+                                        <option value="Muy Baja">Muy Baja</option>
+                                        <option value="Baja">Baja</option>
+                                        <option value="Media">Media</option>
+                                        <option value="Alta">Alta</option>
+                                        <option value="Muy Alta">Muy Alta</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <select id="impacto" class="form-select" required>
+                                        <option value="">Impacto</option>
+                                        <option value="Muy Bajo">Muy Bajo</option>
+                                        <option value="Bajo">Bajo</option>
+                                        <option value="Medio">Medio</option>
+                                        <option value="Alto">Alto</option>
+                                        <option value="Muy Alto">Muy Alto</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <textarea id="observaciones" class="form-control" rows="2" placeholder="Observaciones (opcional)"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">🎯 Evaluar Riesgo</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        const API_URL = 'https://7fj91g35sl.execute-api.us-east-1.amazonaws.com/v1';
+        let empresaId = null;
+
+        async function obtenerEmpresaId() {
+            try {
+                const id = await getEmpresaId();
+                empresaId = id || parseInt(localStorage.getItem('empresa_id') || '8');
+                return empresaId;
+            } catch (error) {
+                empresaId = 8;
+                return 8;
+            }
+        }
+
+        function showMessage(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => { el.style.display = 'none'; }, 4000);
+            }
+        }
+
+        async function cargarAmenazas() {
+            try {
+                const response = await fetch(`${API_URL}/riesgos/amenazas`);
+                const result = await response.json();
+                if (result.success) {
+                    const select = document.getElementById('amenaza_id');
+                    select.innerHTML = '<option value="">Seleccionar Amenaza</option>';
+                    result.data.forEach(a => {
+                        select.innerHTML += `<option value="${a.id}">${a.codigo} - ${a.nombre}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando amenazas:', error);
+            }
+        }
+
+        async function cargarVulnerabilidades() {
+            try {
+                const response = await fetch(`${API_URL}/riesgos/vulnerabilidades`);
+                const result = await response.json();
+                if (result.success) {
+                    const select = document.getElementById('vulnerabilidad_id');
+                    select.innerHTML = '<option value="">Seleccionar Vulnerabilidad</option>';
+                    result.data.forEach(v => {
+                        select.innerHTML += `<option value="${v.id}">${v.codigo} - ${v.nombre}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando vulnerabilidades:', error);
+            }
+        }
+
+        async function cargarActivos() {
+            if (!empresaId) await obtenerEmpresaId();
+            
+            const container = document.getElementById('activosContainer');
+            const loading = document.getElementById('activosLoading');
+            const selectActivo = document.getElementById('activo_id');
+            
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}/riesgos/activos?empresa_id=${empresaId}`);
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = result.data.map(a => `
+                        <div class="activo-item">
+                            <div>
+                                <span class="activo-codigo">${escapeHtml(a.codigo)}</span> - ${escapeHtml(a.nombre)}
+                                <span class="badge-tipo ms-2">${a.tipo}</span>
+                            </div>
+                            ${a.dueno ? `<small class="text-muted">Dueño: ${escapeHtml(a.dueno)}</small>` : ''}
+                        </div>
+                    `).join('');
+                    
+                    selectActivo.innerHTML = '<option value="">Seleccionar Activo</option>';
+                    result.data.forEach(a => {
+                        selectActivo.innerHTML += `<option value="${a.id}">${a.codigo} - ${a.nombre}</option>`;
+                    });
+                } else {
+                    container.innerHTML = '<div class="empty-state">📭 No hay activos registrados. Crea uno arriba.</div>';
+                }
+            } catch (error) {
+                container.innerHTML = '<div class="empty-state text-danger">Error al cargar activos</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        document.getElementById('activoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!empresaId) await obtenerEmpresaId();
+            
+            const data = {
+                empresa_id: empresaId,
+                codigo: document.getElementById('codigo').value,
+                nombre: document.getElementById('nombre').value,
+                tipo: document.getElementById('tipo').value,
+                dueno: document.getElementById('dueno').value,
+                ubicacion: document.getElementById('ubicacion').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/riesgos/activos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('successMessage', '✅ Activo creado correctamente');
+                    document.getElementById('activoForm').reset();
+                    cargarActivos();
+                } else {
+                    showMessage('errorMessage', '❌ Error: ' + result.error, true);
+                }
+            } catch (error) {
+                showMessage('errorMessage', '❌ Error al crear activo', true);
+            }
+        });
+
+        document.getElementById('evaluarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!empresaId) await obtenerEmpresaId();
+            
+            const data = {
+                empresa_id: empresaId,
+                activo_id: parseInt(document.getElementById('activo_id').value),
+                amenaza_id: parseInt(document.getElementById('amenaza_id').value),
+                vulnerabilidad_id: parseInt(document.getElementById('vulnerabilidad_id').value),
+                probabilidad: document.getElementById('probabilidad').value,
+                impacto: document.getElementById('impacto').value,
+                observaciones: document.getElementById('observaciones').value,
+                evaluado_por: localStorage.getItem('user_email') || 'admin'
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/riesgos/evaluar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('successMessage', `✅ Riesgo evaluado: ${result.data.nivel_riesgo}`);
+                    document.getElementById('evaluarForm').reset();
+                } else {
+                    showMessage('errorMessage', '❌ Error: ' + result.error, true);
+                }
+            } catch (error) {
+                showMessage('errorMessage', '❌ Error al evaluar riesgo', true);
+            }
+        });
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await obtenerEmpresaId();
+            await Promise.all([cargarAmenazas(), cargarVulnerabilidades(), cargarActivos()]);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Plan de remediación — Control-PrecISO</title>
+  <style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { font-size: 11pt; }
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.45;
+  color: #1a1a1a;
+  background: #fafafa;
+  margin: 0;
+}
+.print-hint {
+  background: #e8f4fc;
+  border: 1px solid #7eb8da;
+  color: #0c4a6e;
+  padding: 10px 14px;
+  margin: 12px auto 0;
+  max-width: 210mm;
+  border-radius: 6px;
+  font-size: 10pt;
+}
+article.informe {
+  max-width: 210mm;
+  margin: 12px auto 24px;
+  padding: 14mm 16mm;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+h1 { font-size: 18pt; margin-top: 0; page-break-after: avoid; }
+h2 { font-size: 13pt; margin-top: 1.2em; page-break-after: avoid; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+h3 { font-size: 11pt; margin-top: 1em; page-break-after: avoid; }
+h4 { font-size: 10.5pt; margin-top: 0.9em; }
+p, li { orphans: 3; widows: 3; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5pt;
+  margin: 10px 0;
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; page-break-after: auto; }
+th, td {
+  border: 1px solid #bbb;
+  padding: 4px 5px;
+  vertical-align: top;
+  word-break: break-word;
+  hyphens: auto;
+}
+th { background: #f0f4f8; font-weight: 600; }
+code {
+  font-family: ui-monospace, Consolas, "Cascadia Mono", monospace;
+  font-size: 0.88em;
+  background: #f4f4f4;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+pre {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  padding: 10px 12px;
+  font-size: 8pt;
+  overflow-x: auto;
+  page-break-inside: avoid;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+pre code { background: none; padding: 0; }
+hr { border: none; border-top: 1px solid #ccc; margin: 1.2em 0; }
+ul, ol { padding-left: 1.2em; }
+@media print {
+  body { background: #fff; }
+  .screen-only { display: none !important; }
+  article.informe {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+  }
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+  a { color: #000; text-decoration: none; }
+}
+@media screen {
+  .screen-only { }
+}
+</style>
+</head>
+<body>
+  <div class="print-hint screen-only">
+    <strong>Exportar a PDF:</strong> use <kbd>Ctrl+P</kbd> (Windows) o el menú Imprimir →
+    <strong>Guardar como PDF</strong> / <strong>Microsoft Print to PDF</strong>.
+    Documento optimizado para papel A4.
+  </div>
+  <article class="informe">
+<h1>PLAN DE REMEDIACIÓN DE VULNERABILIDADES</h1>
+<p><strong>Proyecto:</strong> Control-PrecISO<br />
+<strong>Documento base:</strong> Informe de análisis de vulnerabilidades (<code>security-analysis/INFORME_VULNERABILIDADES.md</code> y versión imprimible asociada)<br />
+<strong>Versión del plan:</strong> 1.0<br />
+<strong>Fecha:</strong> 13 de mayo de 2026<br />
+<strong>Ámbito:</strong> Medidas orientadas a hallazgos <strong>V-001 a V-014</strong>, priorizando controles <strong>implementables en el código</strong> (HTML/JavaScript) del repositorio, sin sustituir la necesidad futura de endurecimiento en <strong>AWS (API Gateway, Lambda, Cognito)</strong> cuando el equipo disponga de acceso a esos entornos.</p>
+<p><strong>Nota para el equipo:</strong> Este plan está redactado para uso académico y de gestión interna del SGSI. Las tareas deben validarse en ambiente de pruebas antes de desplegar a producción.</p>
+<hr />
+<h2>1. Propósito y objetivos</h2>
+<h3>1.1 Propósito</h3>
+<p>Definir un <strong>orden de trabajo</strong>, <strong>acciones concretas</strong>, <strong>criterios de verificación</strong> y una <strong>priorización</strong> para reducir los riesgos identificados en el informe de vulnerabilidades, con foco en:</p>
+<ul>
+<li>Hallazgos de <strong>severidad crítica y alta</strong> (orden de atención preferente).</li>
+<li>Controles <strong>factibles desde el código</strong> del front-end actual.</li>
+<li>Trazabilidad entre <strong>ID de hallazgo</strong>, <strong>archivos</strong> y <strong>resultado esperado</strong>.</li>
+</ul>
+<h3>1.2 Objetivos medibles</h3>
+<table>
+<thead>
+<tr>
+<th>Objetivo</th>
+<th>Indicador sugerido</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reducir superficie XSS</td>
+<td>Cero interpolaciones de datos de API en <code>innerHTML</code> sin escape en módulos priorizados (lista en §4).</td>
+</tr>
+<tr>
+<td>Endurecer llamadas a API</td>
+<td>Todos los <code>fetch</code> hacia <code>execute-api</code> y similares incluyen cabecera <code>Authorization</code> cuando exista sesión.</td>
+</tr>
+<tr>
+<td>Eliminar multi-tenant “por defecto”</td>
+<td>Ausencia de <code>empresa_id</code> fijo <code>8</code> como fallback en el código versionado.</td>
+</tr>
+<tr>
+<td>Integridad de dependencias front</td>
+<td>CDN de Bootstrap con <strong>SRI</strong> (<code>integrity</code> + <code>crossorigin</code>) en todas las plantillas que lo consumen.</td>
+</tr>
+<tr>
+<td>Mantenibilidad de autenticación</td>
+<td>Una sola implementación de <code>getAccessToken()</code> en <code>js/auth.js</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Alcance y exclusiones</h2>
+<h3>2.1 Alcance</h3>
+<ul>
+<li>Código bajo <code>Control-PrecISO-main/</code> (HTML, JS, CSS).</li>
+<li>Documentación de evidencia en <code>security-analysis/</code>.</li>
+</ul>
+<h3>2.2 Exclusiones (en esta fase del plan)</h3>
+<ul>
+<li>Cambios en políticas de <strong>IAM</strong>, <strong>authorizers</strong> de API Gateway, <strong>WAF</strong> o <strong>Cognito</strong> que requieran consola AWS (se documentan como fase posterior recomendada).</li>
+<li>Pentesting dinámico (DAST) y revisión de infraestructura de red (fuera del alcance del informe estático).</li>
+</ul>
+<hr />
+<h2>3. Criterios de priorización</h2>
+<p>Se aplican tres criterios, en este orden:</p>
+<ol>
+<li><strong>Severidad y riesgo</strong> del informe (crítica → alta → media → baja/informativa).</li>
+<li><strong>Esfuerzo / riesgo de regresión</strong> (preferencia por cambios localizados y reversibles).</li>
+<li><strong>Dependencias</strong> (por ejemplo, unificar <code>authHeaders()</code> antes de tocar muchos <code>fetch</code>).</li>
+</ol>
+<p><strong>Leyenda de esfuerzo:</strong> B = bajo (horas), M = medio (1–2 días de trabajo focalizado), A = alto (varios días o requiere coordinación con backend).</p>
+<hr />
+<h2>4. Fases de ejecución (orden recomendado)</h2>
+<h3>Fase 0 — Preparación (B)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Tarea</th>
+<th>Responsable sugerido</th>
+<th>Verificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0-1</td>
+<td>Crear rama de trabajo (<code>feature/remediacion-seguridad</code>) y respaldo del estado actual.</td>
+<td>Desarrollo</td>
+<td>Rama creada; build o prueba manual “smoke” en login y dashboard.</td>
+</tr>
+<tr>
+<td>P0-2</td>
+<td>Inventariar todos los <code>fetch(</code> hacia URLs <code>amazonaws.com</code> y listarlos en una hoja interna.</td>
+<td>Desarrollo</td>
+<td>Lista completa; marca cuáles ya envían <code>Authorization</code>.</td>
+</tr>
+<tr>
+<td>P0-3</td>
+<td>Inventariar <code>innerHTML</code> con interpolación <code>${...}</code> desde datos remotos.</td>
+<td>Desarrollo</td>
+<td>Lista priorizada por pantallas con datos de usuario o administración.</td>
+</tr>
+</tbody>
+</table>
+<h3>Fase 1 — Riesgo alto, cambios acotados (B–M)</h3>
+<p><strong>Orden sugerido dentro de la fase:</strong> V-006 → V-005 → V-004 (parcial por archivos críticos) → V-003 → V-014.</p>
+<table>
+<thead>
+<tr>
+<th>Hallazgo</th>
+<th>Controles (código)</th>
+<th>Archivos / módulos</th>
+<th>Esfuerzo</th>
+<th>Criterio de “hecho”</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>V-006</strong></td>
+<td>Implementar <code>authHeaders()</code> en <code>auth.js</code> (o <code>utils.js</code>); añadir <code>Authorization: Bearer &lt;access_token&gt;</code> a <strong>todos</strong> los <code>fetch</code> a APIs propias; ante <code>401</code>, redirigir a login o <code>logout()</code>.</td>
+<td><code>superadmin-reportes.html</code>, <code>superadmin-controles.html</code>, <code>superadmin-controles-proveedores.html</code>, y resto de vistas con <code>execute-api</code></td>
+<td>B</td>
+<td>Ningún <code>fetch</code> a API de negocio queda sin cabecera cuando hay token; prueba manual con sesión válida e inválida.</td>
+</tr>
+<tr>
+<td><strong>V-005</strong></td>
+<td>Sustituir <code>innerHTML</code> que incruste <code>error.message</code> por <code>textContent</code> o por <code>escapeHtml(error.message)</code>.</td>
+<td><code>superadmin-reportes.html</code>, <code>superadmin-controles.html</code>, <code>matriz-riesgos.html</code>, etc.</td>
+<td>B</td>
+<td>Búsqueda en repo sin <code>innerHTML</code> + <code>error.message</code> sin escape.</td>
+</tr>
+<tr>
+<td><strong>V-004</strong></td>
+<td>Crear <code>js/utils.js</code> con <code>escapeHtml</code>; incluir script en páginas afectadas; aplicar escape a <strong>código, nombre, descripción</strong> en plantillas dinámicas; preferir DOM + <code>textContent</code> en nuevas piezas.</td>
+<td><code>gestion-riesgos.html</code>, <code>gestion-proveedores.html</code>, <code>admin-empresas.html</code>, …</td>
+<td>M</td>
+<td>Revisión por lista P0-3; prueba con datos de prueba con caracteres <code>&lt;&gt;</code> en nombres.</td>
+</tr>
+<tr>
+<td><strong>V-003</strong></td>
+<td>Eliminar <code>localStorage.setItem('empresa_id', 8)</code> y usos <code>|| 8</code>; si no hay <code>empresa_id</code> válido, mostrar mensaje y no consumir API con tenant indefinido.</td>
+<td><code>dashboard.html</code>, <code>reportes.html</code>, <code>modificar-proveedor.html</code>, <code>gestion-proveedores.html</code>, etc.</td>
+<td>B</td>
+<td>No queda el literal de fallback <code>8</code> como tenant por defecto; flujo manual sin id muestra error controlado.</td>
+</tr>
+<tr>
+<td><strong>V-014</strong></td>
+<td>Unificar <strong>una sola</strong> función <code>getAccessToken()</code> en <code>js/auth.js</code>; actualizar llamadas si hiciera falta.</td>
+<td><code>js/auth.js</code></td>
+<td>B</td>
+<td>Una definición; pruebas de login y de llamada API.</td>
+</tr>
+</tbody>
+</table>
+<h3>Fase 2 — Riesgo crítico y medio (mitigación parcial desde front) (M)</h3>
+<table>
+<thead>
+<tr>
+<th>Hallazgo</th>
+<th>Controles (código)</th>
+<th>Archivos / módulos</th>
+<th>Esfuerzo</th>
+<th>Criterio de “hecho”</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>V-001</strong></td>
+<td>Opción A: no persistir <code>refresh_token</code> en almacenamiento del navegador si el flujo lo permite. Opción B: mover tokens a <code>sessionStorage</code>. Centralizar get/set/clear en <code>auth.js</code>. Quitar logs sensibles.</td>
+<td><code>js/auth.js</code>, referencias en HTML</td>
+<td>M</td>
+<td>Política documentada en comentario de equipo; sesión probada (login, refresh si aplica, logout).</td>
+</tr>
+<tr>
+<td><strong>V-007</strong></td>
+<td>Añadir <strong>SRI</strong> a Bootstrap 5.3.8 en cada <code>&lt;link&gt;</code> del CDN; <code>crossorigin="anonymous"</code>; no cambiar versión sin recalcular hash.</td>
+<td>Los once HTML reportados por Semgrep (<code>login.html</code>, <code>dashboard.html</code>, …)</td>
+<td>B</td>
+<td>Semgrep o búsqueda manual: cada CDN externo tiene <code>integrity</code>.</td>
+</tr>
+<tr>
+<td><strong>V-009</strong></td>
+<td>Incorporar <strong>CSP</strong> vía <code>&lt;meta http-equiv="Content-Security-Policy" content="..."&gt;</code> en plantillas piloto; ajustar <code>script-src</code>, <code>style-src</code>, <code>connect-src</code> para Cognito y API Gateway.</td>
+<td><code>login.html</code>, <code>dashboard.html</code> (piloto) → extensión gradual</td>
+<td>M</td>
+<td>Sin errores de CSP en consola en flujos login + carga dashboard; documentar política final.</td>
+</tr>
+<tr>
+<td><strong>V-002</strong></td>
+<td>Tras <code>isAuthenticated()</code>, validar rol con <code>getUserRole()</code>; si la página exige rol (p. ej. superadmin), redirigir a acceso denegado. Unificar lógica duplicada de rol en <code>dashboard.html</code>.</td>
+<td><code>auth.js</code>, páginas restringidas</td>
+<td>M</td>
+<td>Usuario sin grupo no accede a rutas de admin en prueba manual.</td>
+</tr>
+</tbody>
+</table>
+<h3>Fase 3 — Riesgo medio / bajo / informativo (A–B)</h3>
+<table>
+<thead>
+<tr>
+<th>Hallazgo</th>
+<th>Controles</th>
+<th>Esfuerzo</th>
+<th>Criterio de “hecho”</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>V-008</strong></td>
+<td>Centralizar URLs y <code>COGNITO_CONFIG</code> en <code>js/config.js</code>; evitar duplicar strings de endpoint en cada HTML.</td>
+<td>B</td>
+<td>Un solo lugar de configuración front; revisión de pares.</td>
+</tr>
+<tr>
+<td><strong>V-010</strong></td>
+<td>Mensajes UX: recordatorio de MFA; limpiar campos de contraseña en error. Cambio de flujo Cognito (SRP, etc.) queda fuera si no hay acceso a consola.</td>
+<td>B</td>
+<td>Textos acordados con el equipo; sin regresión en registro/login.</td>
+</tr>
+<tr>
+<td><strong>V-011</strong></td>
+<td>Enlace o instructivo para activación MFA en Cognito (texto en UI).</td>
+<td>B</td>
+<td>Visible donde defina el curso académico.</td>
+</tr>
+<tr>
+<td><strong>V-012</strong></td>
+<td>Re-ejecutar Dependency-Check con base NVD actualizada (cuando haya API key o mejor conectividad); registrar fecha en este plan.</td>
+<td>A (proceso)</td>
+<td>Nuevo <code>dependency-check-report.json</code> archivado.</td>
+</tr>
+<tr>
+<td><strong>V-013</strong></td>
+<td>Mantener Gitleaks en CI (<code>.gitlab-ci.yml</code> o GitHub Actions cuando migren).</td>
+<td>M</td>
+<td>Job documentado; último informe sin fugas.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Matriz resumen hallazgo → controles → verificación</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Severidad</th>
+<th>Control principal en código</th>
+<th>Verificación rápida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V-001</td>
+<td>Crítica</td>
+<td>Política de almacenamiento de tokens + centralización</td>
+<td>DevTools → Application → sin refresh en localStorage si se adoptó la política; flujo login OK.</td>
+</tr>
+<tr>
+<td>V-002</td>
+<td>Alta</td>
+<td>Chequeo de rol + una sola fuente de verdad en JS</td>
+<td>Usuario sin grupo no abre superadmin.</td>
+</tr>
+<tr>
+<td>V-003</td>
+<td>Alta</td>
+<td>Sin fallback tenant <code>8</code>; validación de id</td>
+<td>Búsqueda global <code>empresa_id</code>, 8; prueba sin id.</td>
+</tr>
+<tr>
+<td>V-004</td>
+<td>Alta</td>
+<td><code>escapeHtml</code> / DOM seguro</td>
+<td>Payload de prueba con <code>&lt;script&gt;</code> en nombre no ejecuta.</td>
+</tr>
+<tr>
+<td>V-005</td>
+<td>Media</td>
+<td>Errores sin HTML crudo en DOM</td>
+<td>Inspección de plantillas de error.</td>
+</tr>
+<tr>
+<td>V-006</td>
+<td>Alta</td>
+<td><code>Authorization</code> en <code>fetch</code></td>
+<td>Red sin cabecera no obtiene 200 en APIs que deban estar protegidas (cuando backend exija token).</td>
+</tr>
+<tr>
+<td>V-007</td>
+<td>Media</td>
+<td>SRI en CDN</td>
+<td>Atributo <code>integrity</code> presente.</td>
+</tr>
+<tr>
+<td>V-008</td>
+<td>Media</td>
+<td>Config centralizada</td>
+<td>Un solo módulo de constantes.</td>
+</tr>
+<tr>
+<td>V-009</td>
+<td>Media</td>
+<td>CSP meta (piloto → global)</td>
+<td>Consola sin violaciones bloqueantes en flujos críticos.</td>
+</tr>
+<tr>
+<td>V-010</td>
+<td>Media</td>
+<td>UX + higiene de formulario</td>
+<td>Revisión de texto y campos.</td>
+</tr>
+<tr>
+<td>V-011</td>
+<td>Baja</td>
+<td>Texto MFA</td>
+<td>Visible para el usuario.</td>
+</tr>
+<tr>
+<td>V-012</td>
+<td>Info</td>
+<td>Re-análisis de dependencias</td>
+<td>Informe archivado con fecha.</td>
+</tr>
+<tr>
+<td>V-013</td>
+<td>Info</td>
+<td>Gitleaks en CI</td>
+<td>Pipeline verde.</td>
+</tr>
+<tr>
+<td>V-014</td>
+<td>Baja</td>
+<td>Una función <code>getAccessToken</code></td>
+<td><code>auth.js</code> sin duplicado.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Riesgos del propio plan de remediación</h2>
+<table>
+<thead>
+<tr>
+<th>Riesgo</th>
+<th>Mitigación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Regresión funcional tras CSP o SRI</td>
+<td>Desplegar primero en piloto; usar lista de verificación de pantallas críticas.</td>
+</tr>
+<tr>
+<td>APIs que aún no validan JWT</td>
+<td>El front puede enviar token, pero si el backend no valida, el riesgo persiste; <strong>registrar</strong> como deuda técnica y abrir ítem con equipo de backend/AWS.</td>
+</tr>
+<tr>
+<td>Tiempo académico limitado</td>
+<td>Cerrar Fase 1 completa antes de ampliar CSP a todas las páginas.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Seguimiento y cierre</h2>
+<ol>
+<li><strong>Reunión de cierre de fase:</strong> revisar criterios “hecho” y evidencias (capturas, commits, fecha de análisis repetido).  </li>
+<li><strong>Actualizar informe:</strong> tras cambios sustanciales, volver a ejecutar Semgrep y Gitleaks y <strong>adjuntar</strong> nuevos reportes en <code>security-analysis/</code>.  </li>
+<li><strong>Regenerar documentos imprimibles:</strong> ejecutar <code>python _build_informe_print_html.py</code> (genera los <code>.html</code> para impresión). Para obtener el <strong>PDF del plan</strong>, abra <code>PLAN_REMEDIACION_print.html</code> y use <strong>Ctrl+P → Guardar como PDF</strong>, o en Windows ejecute <code>.\generar_pdf_PLAN_REMEDIACION.ps1</code> en la carpeta <code>security-analysis/</code> (requiere Microsoft Edge).</li>
+</ol>
+<hr />
+<h2>8. Referencias internas</h2>
+<ul>
+<li><code>security-analysis/INFORME_VULNERABILIDADES.md</code>  </li>
+<li><code>security-analysis/semgrep-report.json</code> / <code>semgrep-report.txt</code>  </li>
+<li><code>security-analysis/gitleaks-report.json</code>  </li>
+<li><code>security-analysis/dependency-check-report.html</code> / <code>dependency-check-report.json</code>  </li>
+</ul>
+<hr />
+<p><em>Fin del plan de remediación.</em></p>
+  </article>
+</body>
+</html>

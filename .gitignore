@@ -1,0 +1,13 @@
+# Notas locales (pueden contener contraseñas o credenciales)
+notas.txt
+**/notas.txt
+
+# Artefactos de análisis solo en la raíz del repo (no afecta security-analysis/)
+/semgrep-report.json
+
+# Sistema / editor
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/

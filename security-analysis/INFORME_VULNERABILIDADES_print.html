@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Informe de análisis de vulnerabilidades — Control-PrecISO</title>
+  <style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html { font-size: 11pt; }
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.45;
+  color: #1a1a1a;
+  background: #fafafa;
+  margin: 0;
+}
+.print-hint {
+  background: #e8f4fc;
+  border: 1px solid #7eb8da;
+  color: #0c4a6e;
+  padding: 10px 14px;
+  margin: 12px auto 0;
+  max-width: 210mm;
+  border-radius: 6px;
+  font-size: 10pt;
+}
+article.informe {
+  max-width: 210mm;
+  margin: 12px auto 24px;
+  padding: 14mm 16mm;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+h1 { font-size: 18pt; margin-top: 0; page-break-after: avoid; }
+h2 { font-size: 13pt; margin-top: 1.2em; page-break-after: avoid; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+h3 { font-size: 11pt; margin-top: 1em; page-break-after: avoid; }
+h4 { font-size: 10.5pt; margin-top: 0.9em; }
+p, li { orphans: 3; widows: 3; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5pt;
+  margin: 10px 0;
+  page-break-inside: auto;
+}
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; page-break-after: auto; }
+th, td {
+  border: 1px solid #bbb;
+  padding: 4px 5px;
+  vertical-align: top;
+  word-break: break-word;
+  hyphens: auto;
+}
+th { background: #f0f4f8; font-weight: 600; }
+code {
+  font-family: ui-monospace, Consolas, "Cascadia Mono", monospace;
+  font-size: 0.88em;
+  background: #f4f4f4;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+pre {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  padding: 10px 12px;
+  font-size: 8pt;
+  overflow-x: auto;
+  page-break-inside: avoid;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+pre code { background: none; padding: 0; }
+hr { border: none; border-top: 1px solid #ccc; margin: 1.2em 0; }
+ul, ol { padding-left: 1.2em; }
+@media print {
+  body { background: #fff; }
+  .screen-only { display: none !important; }
+  article.informe {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+  }
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+  a { color: #000; text-decoration: none; }
+}
+@media screen {
+  .screen-only { }
+}
+</style>
+</head>
+<body>
+  <div class="print-hint screen-only">
+    <strong>Exportar a PDF:</strong> use <kbd>Ctrl+P</kbd> (Windows) o el menú Imprimir →
+    <strong>Guardar como PDF</strong> / <strong>Microsoft Print to PDF</strong>.
+    Documento optimizado para papel A4.
+  </div>
+  <article class="informe">
+<h1>INFORME DE ANÁLISIS DE VULNERABILIDADES</h1>
+<p><strong>Proyecto:</strong> Control-PrecISO (aplicación web SGSI / ISO 27001)<br />
+<strong>Alcance del análisis:</strong> Código fuente versionado en el repositorio (rama <code>main</code>), sin despliegue activo ni pruebas de penetración dinámicas.<br />
+<strong>Fecha del informe:</strong> 12 de mayo de 2026<br />
+<strong>Clasificación del documento:</strong> Técnico / uso académico y de cumplimiento interno<br />
+<strong>Restricción:</strong> No se modificó código de la aplicación; únicamente evidencias en <code>security-analysis/</code>.</p>
+<hr />
+<h2>1. Resumen ejecutivo</h2>
+<p>Se realizó un análisis de seguridad de aplicaciones combinando <strong>SAST (Semgrep)</strong>, <strong>detección de secretos (Gitleaks)</strong>, <strong>análisis de dependencias (OWASP Dependency-Check 12.2.2)</strong> y <strong>revisión manual</strong> orientada a OWASP Top 10:2021 e ISO/IEC 27001:2022.</p>
+<p><strong>Stack detectado:</strong> aplicación <strong>estática</strong> basada en <strong>HTML5, JavaScript (vanilla), CSS</strong>, integración con <strong>Amazon Cognito</strong> y múltiples <strong>API Gateway</strong> (REST). No existe <code>package.json</code> en la raíz del código analizado; las dependencias de terceros aparecen principalmente como <strong>CDN (Bootstrap)</strong> en HTML y como <strong>artefactos empaquetados</strong> (<code>mysql2-layer.zip</code>, <code>control-preciso.zip</code>) analizados parcialmente por Dependency-Check.</p>
+<p><strong>Hallazgos agregados (prioridad de negocio):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Severidad (informe)</th>
+<th>Cantidad aproximada</th>
+<th>Comentario breve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Crítica</td>
+<td>1</td>
+<td>Tokens de sesión (incl. refresh) en <code>localStorage</code> → robo vía XSS o malware de extensión.</td>
+</tr>
+<tr>
+<td>Alta</td>
+<td>4</td>
+<td>Control de acceso basado solo en cliente, <code>empresa_id</code> manipulable, patrones XSS por <code>innerHTML</code>, APIs llamadas sin credenciales visibles en algunas vistas admin.</td>
+</tr>
+<tr>
+<td>Media</td>
+<td>5</td>
+<td>CDN sin SRI (11 coincidencias Semgrep), <code>USER_PASSWORD_AUTH</code>, exposición de superficie AWS, errores reflejados al DOM, ausencia de CSP.</td>
+</tr>
+<tr>
+<td>Baja / Informativa</td>
+<td>4</td>
+<td>IDs públicos de Cognito, URLs de API enumerables, Dependency-Check sin CVE en JSON de esta ejecución, Gitleaks sin fugas, calidad de código menor.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Herramientas y entorno:</strong> ver <code>security-analysis/env-verificacion.txt</code>. Python, pip, Node.js y Java estaban disponibles; Semgrep se usó desde la instalación existente (<code>semgrep</code> v1.162.x); Gitleaks v8.30.1 se instaló vía <code>winget</code>; OWASP Dependency-Check se descargó en <code>security-analysis/dependency-check-tool/</code>.</p>
+<p><strong>Remediación inmediata recomendada (antes de exposición amplia o producción):</strong></p>
+<ol>
+<li>Sustituir almacenamiento de <strong>refresh token</strong> (y preferiblemente todos los tokens) fuera de <code>localStorage</code> (cookies <code>HttpOnly</code> + SameSite, flujo PKCE con almacenamiento efímero, o BFF).  </li>
+<li>Garantizar <strong>autorización en servidor</strong> para <code>empresa_id</code> y recursos multi-tenant (no confiar en valores de <code>localStorage</code> o query string).  </li>
+<li>Eliminar o sustituir <strong>innerHTML</strong> con datos remotos por APIs seguras (<code>textContent</code>, plantillas escapadas, DOMPurify si aplica).  </li>
+<li>Añadir <strong>SRI</strong> (<code>integrity</code> + <code>crossorigin</code>) en recursos CDN o alojar dependencias con control de integridad.  </li>
+<li>Revisar endpoints llamados <strong>sin cabecera <code>Authorization</code></strong> en vistas sensibles; asumir que el backend debe validar siempre identidad y permisos.</li>
+</ol>
+<hr />
+<h2>2. Metodología utilizada</h2>
+<h3>2.1 Semgrep (SAST)</h3>
+<ul>
+<li>Comando: <code>semgrep scan --config auto --config p/owasp-top-ten</code> sobre el repositorio, excluyendo <code>security-analysis/</code> y <code>dependency-check-tool/</code>.  </li>
+<li>Evidencia: <code>security-analysis/semgrep-report.json</code>, <code>security-analysis/semgrep-report.txt</code>.  </li>
+<li><strong>Limitación:</strong> el análisis quedó acotado a archivos <strong>rastreados por Git</strong>; archivos &gt; 1 MB (p. ej. algunos ZIP) fueron omitidos por política de Semgrep.  </li>
+<li><strong>Nota de parseo:</strong> Semgrep registró advertencia de parseo parcial en <code>registro.html</code> (posible conflicto con caracteres especiales en regex de validación de contraseña); no invalida el resto del escaneo pero reduce cobertura en ese archivo.</li>
+</ul>
+<h3>2.2 Gitleaks (secret scanning)</h3>
+<ul>
+<li>Comando: <code>gitleaks detect --source . --report-path security-analysis/gitleaks-report.json --report-format json</code>.  </li>
+<li>Resultado: <strong>0 hallazgos</strong> en el historial analizado (array vacío).  </li>
+<li><strong>Limitación:</strong> no analiza secretos solo presentes en working copy no commiteados; tampoco sustituye revisión de secretos en backends no incluidos en el repo.</li>
+</ul>
+<h3>2.3 OWASP Dependency-Check</h3>
+<ul>
+<li>CLI 12.2.2; escaneo de la carpeta <code>Control-PrecISO-main/</code>.  </li>
+<li><strong>Primera ejecución:</strong> fallo de actualización NVD por <strong>HTTP 429</strong> (límite de tasa sin API key).  </li>
+<li><strong>Segunda ejecución:</strong> <code>--noupdate</code> completó el análisis usando datos locales ya descargados parcialmente.  </li>
+<li>Evidencia: <code>security-analysis/dependency-check-report.html</code>, <code>security-analysis/dependency-check-report.json</code>.  </li>
+<li>El JSON listó <strong>135 dependencias</strong> identificadas (incluye extracción parcial de contenidos dentro de ZIPs / lockfiles temporales); <strong>no se observaron entradas <code>CVE-*</code> en el JSON exportado</strong> en esta corrida (no equivale a “cero riesgo”, sino a ausencia de coincidencias CVE en la base efectivamente consultada).</li>
+</ul>
+<h3>2.4 Revisión manual</h3>
+<ul>
+<li>Inspección dirigida de <code>js/auth.js</code>, <code>js/config.js</code>, páginas HTML con <code>fetch</code>, <code>localStorage</code> e <code>innerHTML</code>.  </li>
+<li>Mapeo a OWASP Top 10:2021, CWE e controles ISO 27001:2022 (Anexo A) donde aplica.</li>
+</ul>
+<hr />
+<h2>3. Stack tecnológico detectado</h2>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frontend</td>
+<td>Múltiples <code>.html</code>, <code>styles.css</code>, JS embebido y <code>js/*.js</code>.</td>
+</tr>
+<tr>
+<td>Autenticación</td>
+<td>Amazon Cognito (<code>cognito-idp.*.amazonaws.com</code>), flujo <code>InitiateAuth</code> / <code>USER_PASSWORD_AUTH</code>.</td>
+</tr>
+<tr>
+<td>Backend consumido</td>
+<td>Varios <code>execute-api.us-east-1.amazonaws.com</code> (API Gateway).</td>
+</tr>
+<tr>
+<td>Datos embebidos</td>
+<td><code>controles-iso.json</code>, hojas de cálculo bajo <code>documentos/</code>.</td>
+</tr>
+<tr>
+<td>CI</td>
+<td><code>.gitlab-ci.yml</code> (no ampliado en este informe).</td>
+</tr>
+<tr>
+<td>Gestor de paquetes (app principal)</td>
+<td><strong>No</strong> hay <code>package.json</code> en la raíz del módulo web; dependencias de librerías aparecen vía CDN y ZIPs.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Herramientas verificadas (instalación):</strong> Python 3.14.x, pip 26.x, Node.js v22.x, OpenJDK 25.x — detalle en <code>env-verificacion.txt</code>.</p>
+<hr />
+<h2>4. Vulnerabilidades encontradas</h2>
+<h3>4.1 Tabla maestra</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Vulnerabilidad</th>
+<th>Severidad</th>
+<th>Riesgo</th>
+<th>OWASP Top 10:2021</th>
+<th>Archivo(s) afectado(s)</th>
+<th>Evidencia</th>
+<th>CWE</th>
+<th>ISO 27001:2022 (referencia orientativa)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V-001</td>
+<td>Tokens Cognito (<code>access_token</code>, <code>id_token</code>, <strong><code>refresh_token</code></strong>) almacenados en <code>localStorage</code></td>
+<td>Crítica</td>
+<td>Alto</td>
+<td>A07 – Identification and Authentication Failures</td>
+<td><code>Control-PrecISO-main/js/auth.js</code></td>
+<td><code>security-analysis/semgrep-report.json</code> (contexto general); revisión manual auth</td>
+<td>CWE-522, CWE-923</td>
+<td>A.5.16, A.5.17, A.8.26</td>
+</tr>
+<tr>
+<td>V-002</td>
+<td>Control de acceso basado en <strong>decodificación JWT en cliente</strong> (<code>atob</code>, claims <code>cognito:groups</code>) sin enforcement visible en front</td>
+<td>Alta</td>
+<td>Alto</td>
+<td>A01 – Broken Access Control</td>
+<td><code>Control-PrecISO-main/js/auth.js</code>, <code>dashboard.html</code>, múltiples vistas</td>
+<td>Manual + Semgrep limitado a patrones</td>
+<td>CWE-602, CWE-639</td>
+<td>A.5.15, A.5.16, A.8.3</td>
+</tr>
+<tr>
+<td>V-003</td>
+<td><strong>Multi-tenant frágil:</strong> <code>empresa_id</code> desde <code>localStorage</code> con <strong>fallback fijo (8)</strong>; posible IDOR si el API confía en el parámetro</td>
+<td>Alta</td>
+<td>Alto</td>
+<td>A01 – Broken Access Control</td>
+<td><code>dashboard.html</code>, <code>reportes.html</code>, <code>gestion-proveedores.html</code>, etc.</td>
+<td>Manual</td>
+<td>CWE-639, CWE-284</td>
+<td>A.5.15, A.8.3</td>
+</tr>
+<tr>
+<td>V-004</td>
+<td><strong>DOM XSS / XSS almacenado</strong> potencial: <code>innerHTML</code> con interpolación de datos de API <strong>sin escape</strong> en múltiples pantallas</td>
+<td>Alta</td>
+<td>Alto</td>
+<td>A03 – Injection</td>
+<td><code>gestion-riesgos.html</code>, <code>gestion-proveedores.html</code>, <code>admin-empresas.html</code>, …</td>
+<td>Manual (grep <code>innerHTML</code>)</td>
+<td>CWE-79</td>
+<td>A.5.23, A.8.28</td>
+</tr>
+<tr>
+<td>V-005</td>
+<td>Reflejo de <strong><code>error.message</code></strong> en <code>innerHTML</code> (XSS de segundo orden si el error contiene HTML/markup malicioso)</td>
+<td>Media</td>
+<td>Medio</td>
+<td>A03 – Injection</td>
+<td><code>superadmin-reportes.html</code>, <code>superadmin-controles.html</code>, <code>matriz-riesgos.html</code>, …</td>
+<td>Manual</td>
+<td>CWE-79</td>
+<td>A.8.28</td>
+</tr>
+<tr>
+<td>V-006</td>
+<td>Peticiones a <strong>APIs sensibles sin cabecera <code>Authorization</code></strong> en vistas de reporting superadmin</td>
+<td>Alta</td>
+<td>Medio–Alto</td>
+<td>A01 / A05</td>
+<td><code>superadmin-reportes.html</code></td>
+<td>Manual</td>
+<td>CWE-306, CWE-639</td>
+<td>A.5.15, A.8.3</td>
+</tr>
+<tr>
+<td>V-007</td>
+<td><strong>CDN (Bootstrap) sin <code>integrity</code> (SRI)</strong> — integridad de cadena de suministro / XSS por CDN comprometido</td>
+<td>Media (Semgrep: WARNING)</td>
+<td>Medio</td>
+<td>A08 – Software and Data Integrity Failures</td>
+<td>11 archivos HTML (p. ej. <code>login.html</code>, <code>dashboard.html</code>, …)</td>
+<td><code>semgrep-report.json</code> regla <code>html.security.audit.missing-integrity.*</code></td>
+<td>CWE-353</td>
+<td>A.5.9, A.5.23, A.8.31</td>
+</tr>
+<tr>
+<td>V-008</td>
+<td><strong>Superficie de ataque expuesta:</strong> <code>userPoolId</code>, <code>clientId</code>, múltiples URLs de API Gateway en código legible</td>
+<td>Media</td>
+<td>Medio</td>
+<td>A05 – Security Misconfiguration</td>
+<td><code>js/config.js</code>, múltiples <code>.html</code></td>
+<td>Manual</td>
+<td>CWE-200, CWE-668</td>
+<td>A.5.9, A.5.19</td>
+</tr>
+<tr>
+<td>V-009</td>
+<td><strong>Ausencia de CSP</strong> y otras cabeceras HTTP de endurecimiento (aplicación estática servida típicamente sin políticas)</td>
+<td>Media</td>
+<td>Medio</td>
+<td>A05 – Security Misconfiguration</td>
+<td>Global (HTML servido)</td>
+<td>Manual</td>
+<td>CWE-693</td>
+<td>A.5.14, A.8.12</td>
+</tr>
+<tr>
+<td>V-010</td>
+<td>Uso de <strong><code>USER_PASSWORD_AUTH</code></strong> desde SPA (superficie de fuerza bruta / phishing / ausencia de MFA a nivel app)</td>
+<td>Media</td>
+<td>Medio</td>
+<td>A07 – Identification and Authentication Failures</td>
+<td><code>js/auth.js</code>, <code>registro.html</code>, <code>confirmar.html</code></td>
+<td>Manual</td>
+<td>CWE-287, CWE-307</td>
+<td>A.5.17</td>
+</tr>
+<tr>
+<td>V-011</td>
+<td><strong>MFA/2FA no implementado</strong> en el flujo observado (dependencia exclusiva de políticas Cognito)</td>
+<td>Baja</td>
+<td>Bajo</td>
+<td>A07</td>
+<td>Front + Cognito</td>
+<td>Manual</td>
+<td>—</td>
+<td>A.5.17</td>
+</tr>
+<tr>
+<td>V-012</td>
+<td><strong>Análisis de dependencias:</strong> 135 dependencias rastreadas; <strong>0 CVE</strong> en el JSON exportado en esta ejecución (base NVD incompleta / 429)</td>
+<td>Informativa</td>
+<td>Bajo</td>
+<td>A06 – Vulnerable and Outdated Components</td>
+<td>ZIPs / lockfiles extraídos</td>
+<td><code>dependency-check-report.json</code></td>
+<td>—</td>
+<td>A.5.19, A.8.8, A.8.26</td>
+</tr>
+<tr>
+<td>V-013</td>
+<td><strong>Secretos en Git:</strong> Gitleaks sin coincidencias</td>
+<td>Informativa</td>
+<td>Bajo</td>
+<td>A07 / buena práctica</td>
+<td>Repositorio</td>
+<td><code>gitleaks-report.json</code> (<code>[]</code>)</td>
+<td>—</td>
+<td>A.5.34, A.8.12</td>
+</tr>
+<tr>
+<td>V-014</td>
+<td><strong>Duplicación de función</strong> <code>getAccessToken()</code> en <code>auth.js</code> (mantenimiento / riesgo de lógica divergente)</td>
+<td>Baja</td>
+<td>Bajo</td>
+<td>A04 – Insecure Design (calidad)</td>
+<td><code>js/auth.js</code></td>
+<td>Manual</td>
+<td>CWE-1041</td>
+<td>A.5.23</td>
+</tr>
+</tbody>
+</table>
+<h3>4.2 Fragmentos representativos y descripción técnica</h3>
+<h4>V-001 — Tokens en <code>localStorage</code> (Crítica / Riesgo alto)</h4>
+<p>Tras autenticación exitosa se persisten <strong>tres tokens</strong> en <code>localStorage</code>. Cualquier script XSS en el origen (o extensión maliciosa) puede leerlos y suplantar la sesión, en particular el <strong>refresh token</strong> que permite renovación prolongada.</p>
+<p>```42:46:d:\Universidad\Proyecto de seguridad\Control-PrecISO-main\Control-PrecISO-main\js\auth.js<br />
+        // Guardar el token en localStorage<br />
+        localStorage.setItem('access_token', data.AuthenticationResult.AccessToken);<br />
+        localStorage.setItem('id_token', data.AuthenticationResult.IdToken);<br />
+        localStorage.setItem('refresh_token', data.AuthenticationResult.RefreshToken);<br />
+        localStorage.setItem('user_email', email);</p>
+<pre><code>
+- **Probabilidad:** Alta si existe cualquier vector XSS o compromiso del mismo origen.  
+- **Impacto:** Alto (secuestro de cuenta, acceso a datos de empresa, escalada si el token contiene grupos privilegiados).
+
+#### V-003 — `empresa_id` con valor por defecto (Alta / Riesgo alto)
+
+Si el backend usa `empresa_id` enviado por el cliente sin validación estricta contra el token, un usuario podría manipular datos de otra organización (IDOR).
+
+```25:38:d:\Universidad\Proyecto de seguridad\Control-PrecISO-main\Control-PrecISO-main\dashboard.html
+    async function cargarEmpresaId() {
+        try {
+            const empresaId = await getEmpresaId();
+            if (empresaId) {
+                localStorage.setItem('empresa_id', empresaId);
+                console.log('Empresa ID cargado:', empresaId);
+            } else {
+                console.log('No se pudo obtener empresa_id, usando valor por defecto');
+                localStorage.setItem('empresa_id', 8);
+            }
+        } catch (error) {
+            console.error('Error en cargarEmpresaId:', error);
+            localStorage.setItem('empresa_id', 8);
+        }
+    }
+</code></pre>
+<h4>V-004 — <code>innerHTML</code> con datos remotos sin escape (Alta / Riesgo alto)</h4>
+<p>Ejemplo: opciones construidas concatenando <code>nombre</code> y <code>codigo</code> desde la API directamente en HTML.</p>
+<p><code>``249:253:d:\Universidad\Proyecto de seguridad\Control-PrecISO-main\Control-PrecISO-main\gestion-riesgos.html
+                    const select = document.getElementById('amenaza_id');
+                    select.innerHTML = '&lt;option value=""&gt;Seleccionar Amenaza&lt;/option&gt;';
+                    result.data.forEach(a =&gt; {
+                        select.innerHTML +=</code><option value="${a.id}">${a.codigo} - ${a.nombre}</option>`;<br />
+                    });</p>
+<pre><code>
+- **Riesgo:** Si la API devuelve cadenas con HTML/JS malicioso (por datos corruptos o cuenta comprometida), se ejecuta en el contexto del usuario.
+
+#### V-006 — API sin `Authorization` en vista superadmin (Alta / Riesgo medio–alto)
+
+```80:83:d:\Universidad\Proyecto de seguridad\Control-PrecISO-main\Control-PrecISO-main\superadmin-reportes.html
+        async function cargarReportes() {
+            try {
+                const response = await fetch(API_EMPRESAS);
+                const data = await response.json();
+</code></pre>
+<ul>
+<li><strong>Riesgo:</strong> Depende del endurecimiento del API Gateway (IAM, Cognito authorizer, WAF). Si el endpoint es público, hay <strong>exposición de listado de empresas</strong> y metadatos de cumplimiento.</li>
+</ul>
+<h4>V-007 — CDN sin SRI (Media / Riesgo medio) — hallazgo automático</h4>
+<p>Semgrep (<code>html.security.audit.missing-integrity.missing-integrity</code>) reportó <strong>11 ocurrencias</strong> en etiquetas <code>&lt;link&gt;</code> o <code>&lt;script&gt;</code> a <code>cdn.jsdelivr.net</code> sin atributo <code>integrity</code>. Consolidado como un único riesgo de cadena de suministro / integridad.</p>
+<p>Ejemplo (<code>dashboard.html</code>):</p>
+<p>```4:8:d:\Universidad\Proyecto de seguridad\Control-PrecISO-main\Control-PrecISO-main\dashboard.html<br />
+    <script src="js/config.js"></script><br />
+    <script src="js/auth.js"></script><br />
+    <title>Dashboard</title><br />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"><br />
+    <link rel="stylesheet" href="styles.css"></p>
+<pre><code>
+#### V-010 — `USER_PASSWORD_AUTH` (Media / Riesgo medio)
+
+```14:20:d:\Universidad\Proyecto de seguridad\Control-PrecISO-main\Control-PrecISO-main\js\auth.js
+            body: JSON.stringify({
+                AuthFlow: 'USER_PASSWORD_AUTH',
+                ClientId: COGNITO_CONFIG.clientId,
+                AuthParameters: {
+                    USERNAME: email,
+                    PASSWORD: password
+                }
+            })
+</code></pre>
+<ul>
+<li><strong>Riesgo:</strong> Incrementa superficie de ataques de credenciales en cliente; debe compensarse con MFA obligatorio, políticas de contraseña, riesgo de bots, y consideración de flujos Hosted UI / PKCE.</li>
+</ul>
+<hr />
+<h2>5. Priorización de remediación</h2>
+<h3>5.1 Riesgo alto (acción inmediata)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Acción correctiva orientativa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V-001</td>
+<td>Migrar tokens a modelo <strong>BFF</strong> o cookies <strong>HttpOnly</strong> + <strong>Secure</strong> + <strong>SameSite</strong>; acortar vida del refresh; considerar revocación y rotación.</td>
+</tr>
+<tr>
+<td>V-002, V-003</td>
+<td><strong>Autorización server-side</strong> obligatoria: derivar <code>empresa_id</code> y roles del token verificado en backend; eliminar fallbacks numéricos en cliente.</td>
+</tr>
+<tr>
+<td>V-004, V-005</td>
+<td>Sustituir <code>innerHTML</code> por construcción segura o sanitizar con biblioteca mantenida; nunca interpolar errores crudos.</td>
+</tr>
+<tr>
+<td>V-006</td>
+<td>Añadir <strong>authorizer</strong> (Cognito/JWT) a API Gateway o validación Lambda; enviar siempre <code>Authorization</code> desde cliente y <strong>rechazar</strong> sin token.</td>
+</tr>
+</tbody>
+</table>
+<h3>5.2 Riesgo medio</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Acción correctiva orientativa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V-007</td>
+<td>Añadir <strong>SRI</strong> y <code>crossorigin</code> a CDN o servir Bootstrap desde origen propio con hashing.</td>
+</tr>
+<tr>
+<td>V-008</td>
+<td>Mover configuración no secreta a build-time/env; endurecer CORS y rate limiting en API; minimizar datos en respuestas.</td>
+</tr>
+<tr>
+<td>V-009</td>
+<td>Definir <strong>CSP</strong>, <code>X-Frame-Options</code>/<code>frame-ancestors</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code> en el servidor de estáticos.</td>
+</tr>
+<tr>
+<td>V-010</td>
+<td>Habilitar <strong>MFA</strong> en Cognito; valorar flujo <strong>SRP</strong> / Hosted UI según documentación AWS actual.</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 Riesgo bajo / informativo</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V-011</td>
+<td>Política organizacional MFA + concienciación.</td>
+</tr>
+<tr>
+<td>V-012</td>
+<td>Registrar <strong>NVD API key</strong> y repetir Dependency-Check; añadir <code>package.json</code> explícito si se adopta npm.</td>
+</tr>
+<tr>
+<td>V-013</td>
+<td>Mantener Gitleaks en CI en cada push.</td>
+</tr>
+<tr>
+<td>V-014</td>
+<td>Unificar helpers de token; pruebas unitarias en módulo auth.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Conclusión de seguridad</h2>
+<p>La aplicación presenta un <strong>nivel de madurez de seguridad típico de un MVP front-end</strong> con integración directa a Cognito y APIs públicas: funcionalmente operativa, pero con <strong>riesgos elevados en autenticación/sesión (A07)</strong>, <strong>control de acceso multi-tenant (A01)</strong> y <strong>superficie XSS (A03)</strong>, más <strong>debilidades de integridad de cadena de suministro en CDN (A08)</strong>.</p>
+<p><strong>Nivel estimado de exposición:</strong> <strong>Alto</strong> frente a un atacante con capacidad de ejecutar JavaScript en el origen (XSS) o de invocar APIs mal configuradas; <strong>Medio</strong> frente a un adversario solo remoto sin XSS, dependiendo del endurecimiento real del API Gateway (no observable solo desde el front estático).</p>
+<p><strong>Fortalezas observadas:</strong> uso de Cognito en lugar de password propio; en algunas pantallas uso de <code>escapeHtml</code> (buen patrón, no homogéneo); Gitleaks sin fugas en el historial Git analizado.</p>
+<p><strong>Recomendación académica / SGSI:</strong> documentar este informe como <strong>evidencia de evaluación de vulnerabilidades</strong> (ciclo PDCA / tratamiento de riesgos ISO 27001) y planificar remediación, prueba de regresión y <strong>nueva corrida de herramientas</strong> tras cambios.</p>
+<hr />
+<h2>Anexo A — Ubicación de evidencias</h2>
+<table>
+<thead>
+<tr>
+<th>Artefacto</th>
+<th>Ruta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Informe (este documento)</td>
+<td><code>security-analysis/INFORME_VULNERABILIDADES.md</code></td>
+</tr>
+<tr>
+<td>Semgrep JSON</td>
+<td><code>security-analysis/semgrep-report.json</code></td>
+</tr>
+<tr>
+<td>Semgrep TXT</td>
+<td><code>security-analysis/semgrep-report.txt</code></td>
+</tr>
+<tr>
+<td>Gitleaks JSON</td>
+<td><code>security-analysis/gitleaks-report.json</code></td>
+</tr>
+<tr>
+<td>Dependency-Check HTML</td>
+<td><code>security-analysis/dependency-check-report.html</code></td>
+</tr>
+<tr>
+<td>Dependency-Check JSON</td>
+<td><code>security-analysis/dependency-check-report.json</code></td>
+</tr>
+<tr>
+<td>Verificación de entorno</td>
+<td><code>security-analysis/env-verificacion.txt</code></td>
+</tr>
+<tr>
+<td>CLI Dependency-Check (descargado)</td>
+<td><code>security-analysis/dependency-check-tool/</code></td>
+</tr>
+<tr>
+<td>ZIP de distribución ODC</td>
+<td><code>security-analysis/dependency-check-dist.zip</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Anexo B — Conteo por severidad (informe propio)</h2>
+<table>
+<thead>
+<tr>
+<th>Severidad</th>
+<th>Cantidad (IDs V-001…V-014)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Crítica</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Alta</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Media</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Baja</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Informativa</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hallazgos automáticos Semgrep:</strong> 11 coincidencias de la misma familia de reglas (consolidadas en <strong>V-007</strong> en la tabla maestra).</p>
+<hr />
+<p><em>Fin del informe.</em></p>
+  </article>
+</body>
+</html>
