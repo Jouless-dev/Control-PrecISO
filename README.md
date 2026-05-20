@@ -21,9 +21,9 @@ Repositorio de trabajo para **análisis de vulnerabilidades**, informes y **reme
 ## Análisis de seguridad (local)
 
 ```powershell
-cd security-analysis
-# Ver guía completa: GUIA_EQUIPO_SEGURIDAD.md
-..\security-analysis\run-security-scan.ps1
+# Desde la raíz del repositorio
+.\security-analysis\run-security-scan.ps1
 ```
 
+Guía detallada: `security-analysis/GUIA_EQUIPO_SEGURIDAD.md`  
 Requisitos: Git, Python 3.12+, Semgrep, Gitleaks (ver `security-analysis/env-verificacion.txt`).

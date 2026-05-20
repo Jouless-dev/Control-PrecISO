@@ -1,4 +1,4 @@
-﻿=== Verificacion entorno (2026-05-20) ===
+=== Verificacion entorno (2026-05-20, PC actual) ===
 Git: git version 2.54.0.windows.1
 Python: Python 3.12.10
 pip: pip 26.1.1 (python 3.12)
@@ -9,3 +9,7 @@ Java: openjdk 17.0.19 Temurin-17.0.19+10
 Instalado via winget + pip install semgrep markdown
 Script de escaneo: security-analysis/run-security-scan.ps1
 Guia equipo: security-analysis/GUIA_EQUIPO_SEGURIDAD.md
+
+=== Verificacion anterior (2026-05-12, otra maquina) ===
+Python 3.14.5, Node.js v24.15.0, Semgrep 1.162.0, Java 25.0.3
+OWASP Dependency-Check: 12.2.2 (CLI en security-analysis/dependency-check-tool)
