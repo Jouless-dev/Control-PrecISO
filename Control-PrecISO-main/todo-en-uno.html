@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <title>Todo en Uno - ISO 27001 | Control PrecISO</title>
     <style>
         * {
@@ -490,8 +491,8 @@
                         <div class="control-title">CONTROL ${controlId}</div>
                     </div>
                     <div class="control-desc">
-                        <strong>${control.titulo}</strong><br>
-                        <span style="color: #64748b; font-size: 12px;">${control.descripcion || 'Control de la norma ISO 27001:2022'}</span>
+                        <strong>${escapeHtml(control.titulo)}</strong><br>
+                        <span style="color: #64748b; font-size: 12px;">${escapeHtml(control.descripcion || 'Control de la norma ISO 27001:2022')}</span>
                     </div>
                     <div class="estados-row">
                         <div class="estado-group">
@@ -577,9 +578,9 @@
                 // Guardar implementación
                 if (cambio.implementacion !== undefined) {
                     try {
-                        const response = await fetch(API_ESTADOS, {
+                        const response = await apiFetch(API_ESTADOS, {
                             method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: authHeaders({ 'Content-Type': 'application/json' }),
                             body: JSON.stringify({
                                 empresa_id: EMPRESA_ID,
                                 control_id: controlId,
@@ -604,9 +605,9 @@
                 // Guardar auditoría
                 if (cambio.auditoria !== undefined) {
                     try {
-                        const response = await fetch(API_ESTADOS, {
+                        const response = await apiFetch(API_ESTADOS, {
                             method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: authHeaders({ 'Content-Type': 'application/json' }),
                             body: JSON.stringify({
                                 empresa_id: EMPRESA_ID,
                                 control_id: controlId,
@@ -651,7 +652,7 @@
                 statsDiv.style.display = 'none';
 
                 // 1. Obtener controles seleccionados
-                const responseControles = await fetch(`${API_EMPRESA_CONTROLES}?empresa_id=${EMPRESA_ID}`);
+                const responseControles = await apiFetch(`${API_EMPRESA_CONTROLES}?empresa_id=${EMPRESA_ID}`);
                 if (!responseControles.ok) throw new Error('Error al cargar controles');
                 const dataControles = await responseControles.json();
                 const controlIds = dataControles.controles || [];
@@ -661,7 +662,7 @@
                 }
                 
                 // 2. Obtener estados
-                const responseEstados = await fetch(`${API_ESTADOS}?empresa_id=${EMPRESA_ID}`);
+                const responseEstados = await apiFetch(`${API_ESTADOS}?empresa_id=${EMPRESA_ID}`);
                 if (!responseEstados.ok) throw new Error('Error al cargar estados');
                 const dataEstados = await responseEstados.json();
                 const estados = dataEstados.estados || [];
@@ -675,7 +676,7 @@
                 });
                 
                 // 3. Obtener detalles de controles
-                const responseDetalles = await fetch('https://lycd7kx0r2.execute-api.us-east-1.amazonaws.com/v1/controles');
+                const responseDetalles = await apiFetch('https://lycd7kx0r2.execute-api.us-east-1.amazonaws.com/v1/controles');
                 if (!responseDetalles.ok) throw new Error('Error al cargar detalles');
                 const dataDetalles = await responseDetalles.json();
                 const todosControles = dataDetalles.controles || [];

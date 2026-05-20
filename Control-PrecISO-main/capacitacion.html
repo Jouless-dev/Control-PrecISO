@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <title>Capacitación ISO 27001 - Control PrecISO</title>
     <style>
         * {
@@ -364,8 +365,8 @@
                         <div class="control-title">CONTROL ${control.id}</div>
                     </div>
                     <div class="control-desc">
-                        <strong>${control.titulo}</strong><br>
-                        <span style="color: #64748b; font-size: 12px;">${control.descripcion || 'Control de la norma ISO 27001:2022'}</span>
+                        <strong>${escapeHtml(control.titulo)}</strong><br>
+                        <span style="color: #64748b; font-size: 12px;">${escapeHtml(control.descripcion || 'Control de la norma ISO 27001:2022')}</span>
                     </div>
                     <span class="badge-categoria ${getBadgeClass(control.categoria)}">${control.categoria}</span>
                 `;
@@ -403,7 +404,7 @@
                 containerDiv.style.display = 'none';
 
                 // 1. Obtener controles seleccionados para la empresa
-                const responseSeleccionados = await fetch(`${API_EMPRESA_CONTROLES}?empresa_id=${EMPRESA_ID}`);
+                const responseSeleccionados = await apiFetch(`${API_EMPRESA_CONTROLES}?empresa_id=${EMPRESA_ID}`);
                 if (!responseSeleccionados.ok) throw new Error('Error al cargar controles seleccionados');
                 const dataSeleccionados = await responseSeleccionados.json();
                 const controlIds = dataSeleccionados.controles || [];
@@ -413,7 +414,7 @@
                 }
                 
                 // 2. Obtener detalles de todos los controles
-                const responseDetalles = await fetch(API_CONTROLES);
+                const responseDetalles = await apiFetch(API_CONTROLES);
                 if (!responseDetalles.ok) throw new Error('Error al cargar detalles de controles');
                 const dataDetalles = await responseDetalles.json();
                 const todosControlesCompletos = dataDetalles.controles || [];

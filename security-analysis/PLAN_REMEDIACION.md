@@ -1,152 +1,275 @@
 # PLAN DE REMEDIACIÓN DE VULNERABILIDADES
 
-**Proyecto:** Control-PrecISO  
-**Documento base:** Informe de análisis de vulnerabilidades (`security-analysis/INFORME_VULNERABILIDADES.md` y versión imprimible asociada)  
-**Versión del plan:** 1.0  
-**Fecha:** 13 de mayo de 2026  
-**Ámbito:** Medidas orientadas a hallazgos **V-001 a V-014**, priorizando controles **implementables en el código** (HTML/JavaScript) del repositorio, sin sustituir la necesidad futura de endurecimiento en **AWS (API Gateway, Lambda, Cognito)** cuando el equipo disponga de acceso a esos entornos.
-
-**Nota para el equipo:** Este plan está redactado para uso académico y de gestión interna del SGSI. Las tareas deben validarse en ambiente de pruebas antes de desplegar a producción.
-
----
-
-## 1. Propósito y objetivos
-
-### 1.1 Propósito
-
-Definir un **orden de trabajo**, **acciones concretas**, **criterios de verificación** y una **priorización** para reducir los riesgos identificados en el informe de vulnerabilidades, con foco en:
-
-- Hallazgos de **severidad crítica y alta** (orden de atención preferente).
-- Controles **factibles desde el código** del front-end actual.
-- Trazabilidad entre **ID de hallazgo**, **archivos** y **resultado esperado**.
-
-### 1.2 Objetivos medibles
-
-| Objetivo | Indicador sugerido |
-|----------|-------------------|
-| Reducir superficie XSS | Cero interpolaciones de datos de API en `innerHTML` sin escape en módulos priorizados (lista en §4). |
-| Endurecer llamadas a API | Todos los `fetch` hacia `execute-api` y similares incluyen cabecera `Authorization` cuando exista sesión. |
-| Eliminar multi-tenant “por defecto” | Ausencia de `empresa_id` fijo `8` como fallback en el código versionado. |
-| Integridad de dependencias front | CDN de Bootstrap con **SRI** (`integrity` + `crossorigin`) en todas las plantillas que lo consumen. |
-| Mantenibilidad de autenticación | Una sola implementación de `getAccessToken()` en `js/auth.js`. |
+| | |
+|---|---|
+| **Proyecto** | Control-PrecISO |
+| **Versión del plan** | 1.0 |
+| **Fecha** | 20 de mayo de 2026 |
+| **Documento base** | `INFORME_VULNERABILIDADES.md` v1.0 |
+| **Ámbito** | Solo código en `Control-PrecISO-main/` (HTML, CSS, JavaScript) |
 
 ---
 
-## 2. Alcance y exclusiones
+## 1. Propósito
 
-### 2.1 Alcance
+Definir **qué cambios de código** se pueden aplicar **ahora**, con la información disponible y **sin coordinación con el equipo**, para **reducir el número y la gravedad** de las vulnerabilidades del informe v1.0, manteniendo el comportamiento que hoy funciona contra **Cognito y API Gateway en AWS**.
 
-- Código bajo `Control-PrecISO-main/` (HTML, JS, CSS).
-- Documentación de evidencia en `security-analysis/`.
-
-### 2.2 Exclusiones (en esta fase del plan)
-
-- Cambios en políticas de **IAM**, **authorizers** de API Gateway, **WAF** o **Cognito** que requieran consola AWS (se documentan como fase posterior recomendada).
-- Pentesting dinámico (DAST) y revisión de infraestructura de red (fuera del alcance del informe estático).
+Este documento es la **autorización de trabajo**: no se modifica la aplicación hasta recibir confirmación explícita para ejecutar.
 
 ---
 
-## 3. Criterios de priorización
+## 2. Principios (no romper lo que ya funciona)
 
-Se aplican tres criterios, en este orden:
-
-1. **Severidad y riesgo** del informe (crítica → alta → media → baja/informativa).
-2. **Esfuerzo / riesgo de regresión** (preferencia por cambios localizados y reversibles).
-3. **Dependencias** (por ejemplo, unificar `authHeaders()` antes de tocar muchos `fetch`).
-
-**Leyenda de esfuerzo:** B = bajo (horas), M = medio (1–2 días de trabajo focalizado), A = alto (varios días o requiere coordinación con backend).
-
----
-
-## 4. Fases de ejecución (orden recomendado)
-
-### Fase 0 — Preparación (B)
-
-| ID | Tarea | Responsable sugerido | Verificación |
-|----|--------|----------------------|--------------|
-| P0-1 | Crear rama de trabajo (`feature/remediacion-seguridad`) y respaldo del estado actual. | Desarrollo | Rama creada; build o prueba manual “smoke” en login y dashboard. |
-| P0-2 | Inventariar todos los `fetch(` hacia URLs `amazonaws.com` y listarlos en una hoja interna. | Desarrollo | Lista completa; marca cuáles ya envían `Authorization`. |
-| P0-3 | Inventariar `innerHTML` con interpolación `${...}` desde datos remotos. | Desarrollo | Lista priorizada por pantallas con datos de usuario o administración. |
-
-### Fase 1 — Riesgo alto, cambios acotados (B–M)
-
-**Orden sugerido dentro de la fase:** V-006 → V-005 → V-004 (parcial por archivos críticos) → V-003 → V-014.
-
-| Hallazgo | Controles (código) | Archivos / módulos | Esfuerzo | Criterio de “hecho” |
-|----------|-------------------|-------------------|----------|---------------------|
-| **V-006** | Implementar `authHeaders()` en `auth.js` (o `utils.js`); añadir `Authorization: Bearer <access_token>` a **todos** los `fetch` a APIs propias; ante `401`, redirigir a login o `logout()`. | `superadmin-reportes.html`, `superadmin-controles.html`, `superadmin-controles-proveedores.html`, y resto de vistas con `execute-api` | B | Ningún `fetch` a API de negocio queda sin cabecera cuando hay token; prueba manual con sesión válida e inválida. |
-| **V-005** | Sustituir `innerHTML` que incruste `error.message` por `textContent` o por `escapeHtml(error.message)`. | `superadmin-reportes.html`, `superadmin-controles.html`, `matriz-riesgos.html`, etc. | B | Búsqueda en repo sin `innerHTML` + `error.message` sin escape. |
-| **V-004** | Crear `js/utils.js` con `escapeHtml`; incluir script en páginas afectadas; aplicar escape a **código, nombre, descripción** en plantillas dinámicas; preferir DOM + `textContent` en nuevas piezas. | `gestion-riesgos.html`, `gestion-proveedores.html`, `admin-empresas.html`, … | M | Revisión por lista P0-3; prueba con datos de prueba con caracteres `<>` en nombres. |
-| **V-003** | Eliminar `localStorage.setItem('empresa_id', 8)` y usos `|| 8`; si no hay `empresa_id` válido, mostrar mensaje y no consumir API con tenant indefinido. | `dashboard.html`, `reportes.html`, `modificar-proveedor.html`, `gestion-proveedores.html`, etc. | B | No queda el literal de fallback `8` como tenant por defecto; flujo manual sin id muestra error controlado. |
-| **V-014** | Unificar **una sola** función `getAccessToken()` en `js/auth.js`; actualizar llamadas si hiciera falta. | `js/auth.js` | B | Una definición; pruebas de login y de llamada API. |
-
-### Fase 2 — Riesgo crítico y medio (mitigación parcial desde front) (M)
-
-| Hallazgo | Controles (código) | Archivos / módulos | Esfuerzo | Criterio de “hecho” |
-|----------|-------------------|-------------------|----------|---------------------|
-| **V-001** | Opción A: no persistir `refresh_token` en almacenamiento del navegador si el flujo lo permite. Opción B: mover tokens a `sessionStorage`. Centralizar get/set/clear en `auth.js`. Quitar logs sensibles. | `js/auth.js`, referencias en HTML | M | Política documentada en comentario de equipo; sesión probada (login, refresh si aplica, logout). |
-| **V-007** | Añadir **SRI** a Bootstrap 5.3.8 en cada `<link>` del CDN; `crossorigin="anonymous"`; no cambiar versión sin recalcular hash. | Los once HTML reportados por Semgrep (`login.html`, `dashboard.html`, …) | B | Semgrep o búsqueda manual: cada CDN externo tiene `integrity`. |
-| **V-009** | Incorporar **CSP** vía `<meta http-equiv="Content-Security-Policy" content="...">` en plantillas piloto; ajustar `script-src`, `style-src`, `connect-src` para Cognito y API Gateway. | `login.html`, `dashboard.html` (piloto) → extensión gradual | M | Sin errores de CSP en consola en flujos login + carga dashboard; documentar política final. |
-| **V-002** | Tras `isAuthenticated()`, validar rol con `getUserRole()`; si la página exige rol (p. ej. superadmin), redirigir a acceso denegado. Unificar lógica duplicada de rol en `dashboard.html`. | `auth.js`, páginas restringidas | M | Usuario sin grupo no accede a rutas de admin en prueba manual. |
-
-### Fase 3 — Riesgo medio / bajo / informativo (A–B)
-
-| Hallazgo | Controles | Esfuerzo | Criterio de “hecho” |
-|----------|-----------|---------|---------------------|
-| **V-008** | Centralizar URLs y `COGNITO_CONFIG` en `js/config.js`; evitar duplicar strings de endpoint en cada HTML. | B | Un solo lugar de configuración front; revisión de pares. |
-| **V-010** | Mensajes UX: recordatorio de MFA; limpiar campos de contraseña en error. Cambio de flujo Cognito (SRP, etc.) queda fuera si no hay acceso a consola. | B | Textos acordados con el equipo; sin regresión en registro/login. |
-| **V-011** | Enlace o instructivo para activación MFA en Cognito (texto en UI). | B | Visible donde defina el curso académico. |
-| **V-012** | Re-ejecutar Dependency-Check con base NVD actualizada (cuando haya API key o mejor conectividad); registrar fecha en este plan. | A (proceso) | Nuevo `dependency-check-report.json` archivado. |
-| **V-013** | Mantener Gitleaks en CI (`.gitlab-ci.yml` o GitHub Actions cuando migren). | M | Job documentado; último informe sin fugas. |
+| # | Principio |
+|---|-----------|
+| P1 | **No cambiar** URLs de API, `COGNITO_CONFIG`, flujo de login ni tipo de autenticación (`USER_PASSWORD_AUTH`). |
+| P2 | **No eliminar** el fallback `empresa_id = 8` en esta versión del plan (riesgo de pantallas vacías en demo; ver §6). |
+| P3 | **Solo añadir o endurecer** salida HTML y cabeceras HTTP en `fetch` cuando ya exista sesión. |
+| P4 | Tras cada fase: prueba manual mínima (login → dashboard → una pantalla de gestión → una de superadmin si aplica). |
+| P5 | Tras cada fase: ejecutar `run-security-scan.ps1` y anotar resultados en `env-verificacion.txt`. |
 
 ---
 
-## 5. Matriz resumen hallazgo → controles → verificación
+## 3. Alcance y exclusiones
 
-| ID | Severidad | Control principal en código | Verificación rápida |
-|----|-----------|------------------------------|----------------------|
-| V-001 | Crítica | Política de almacenamiento de tokens + centralización | DevTools → Application → sin refresh en localStorage si se adoptó la política; flujo login OK. |
-| V-002 | Alta | Chequeo de rol + una sola fuente de verdad en JS | Usuario sin grupo no abre superadmin. |
-| V-003 | Alta | Sin fallback tenant `8`; validación de id | Búsqueda global `empresa_id`, 8; prueba sin id. |
-| V-004 | Alta | `escapeHtml` / DOM seguro | Payload de prueba con `<script>` en nombre no ejecuta. |
-| V-005 | Media | Errores sin HTML crudo en DOM | Inspección de plantillas de error. |
-| V-006 | Alta | `Authorization` en `fetch` | Red sin cabecera no obtiene 200 en APIs que deban estar protegidas (cuando backend exija token). |
-| V-007 | Media | SRI en CDN | Atributo `integrity` presente. |
-| V-008 | Media | Config centralizada | Un solo módulo de constantes. |
-| V-009 | Media | CSP meta (piloto → global) | Consola sin violaciones bloqueantes en flujos críticos. |
-| V-010 | Media | UX + higiene de formulario | Revisión de texto y campos. |
-| V-011 | Baja | Texto MFA | Visible para el usuario. |
-| V-012 | Info | Re-análisis de dependencias | Informe archivado con fecha. |
-| V-013 | Info | Gitleaks en CI | Pipeline verde. |
-| V-014 | Baja | Una función `getAccessToken` | `auth.js` sin duplicado. |
+### 3.1 Incluido en v1.0
 
----
+| ID | Mitigación prevista en código |
+|----|------------------------------|
+| V-004 | Escape sistemático de datos en `innerHTML` |
+| V-005 | Errores sin `innerHTML` inseguro |
+| V-006 | Cabecera `Authorization` en `fetch` a APIs propias |
+| V-007 | SRI en enlaces Bootstrap CDN (11 páginas) |
+| V-014 | Una sola función `getAccessToken()` |
+| V-004 (refuerzo) | Reutilizar patrón `escapeHtml` ya existente en 4 pantallas |
 
-## 6. Riesgos del propio plan de remediación
+### 3.2 Mitigación parcial (opcional en Fase 2)
 
-| Riesgo | Mitigación |
-|--------|------------|
-| Regresión funcional tras CSP o SRI | Desplegar primero en piloto; usar lista de verificación de pantallas críticas. |
-| APIs que aún no validan JWT | El front puede enviar token, pero si el backend no valida, el riesgo persiste; **registrar** como deuda técnica y abrir ítem con equipo de backend/AWS. |
-| Tiempo académico limitado | Cerrar Fase 1 completa antes de ampliar CSP a todas las páginas. |
+| ID | Acción | Motivo de “parcial” |
+|----|--------|---------------------|
+| V-001 | Dejar de guardar `refresh_token` **solo si** no se usa en ningún script | Reduce impacto crítico sin cambiar Cognito; requiere verificación previa con `grep` |
 
----
+### 3.3 Fuera de alcance v1.0 (no reduce conteo en Semgrep; requiere AWS o rediseño)
 
-## 7. Seguimiento y cierre
-
-1. **Reunión de cierre de fase:** revisar criterios “hecho” y evidencias (capturas, commits, fecha de análisis repetido).  
-2. **Actualizar informe:** tras cambios sustanciales, volver a ejecutar Semgrep y Gitleaks y **adjuntar** nuevos reportes en `security-analysis/`.  
-3. **Regenerar documentos imprimibles:** ejecutar `python _build_informe_print_html.py` (genera los `.html` para impresión). Para obtener el **PDF del plan**, abra `PLAN_REMEDIACION_print.html` y use **Ctrl+P → Guardar como PDF**, o en Windows ejecute `.\generar_pdf_PLAN_REMEDIACION.ps1` en la carpeta `security-analysis/` (requiere Microsoft Edge).
+| ID | Motivo |
+|----|--------|
+| V-001 (completo) | Sacar todos los tokens de `localStorage` implica cookies `HttpOnly` o backend intermedio |
+| V-002 | La autorización real debe validarse en servidor; en front solo se mantiene la UI actual |
+| V-003 | Quitar `empresa_id = 8` puede romper el flujo de demo sin confirmación del equipo |
+| V-008 | IDs y URLs públicos en SPA; ocultarlos no es viable solo con HTML estático |
+| V-009 | CSP estricta puede romper scripts inline en muchas páginas |
+| V-010, V-011 | Configuración en consola Cognito, no en este repositorio |
 
 ---
 
-## 8. Referencias internas
+## 4. Resultado esperado (reducción de vulnerabilidades)
 
-- `security-analysis/INFORME_VULNERABILIDADES.md`  
-- `security-analysis/semgrep-report.json` / `semgrep-report.txt`  
-- `security-analysis/gitleaks-report.json`  
-- `security-analysis/dependency-check-report.html` / `dependency-check-report.json`  
+| Métrica | Antes (informe v1.0) | Objetivo tras plan v1.0 |
+|---------|----------------------|-------------------------|
+| Hallazgos **Semgrep** | 11 (CDN sin SRI) | **0** |
+| Hallazgos **Gitleaks** | 0 | **0** (mantener) |
+| **V-007** | Abierto | **Cerrado** |
+| **V-005** | Abierto | **Cerrado** (5 archivos) |
+| **V-014** | Abierto | **Cerrado** |
+| **V-006** | Abierto | **Mitigado en cliente** (token enviado cuando hay sesión)* |
+| **V-004** | Abierto | **Mitigado** en pantallas prioritarias; revisión manual del resto |
+| **V-001** | Crítica abierta | **Abierta** o **parcial** (solo si Fase 2 opcional aplica) |
+| **V-003, V-002, V-008–V-011** | Abiertos | Documentados como limitación v1.0 |
+
+\*Si el API Gateway ignora el header, la app sigue funcionando igual; si en el futuro exige token, el front ya cumple.
+
+**Resumen para exposición:** el plan v1.0 ataca **5 hallazgos de forma completa** y **refuerza 2 de alta gravedad** (V-004, V-006) sin tocar la nube.
 
 ---
 
-*Fin del plan de remediación.*
+## 5. Fases de ejecución
+
+### Fase 0 — Preparación (sin cambiar lógica de negocio)
+
+| Tarea | Descripción | Criterio de hecho |
+|-------|-------------|-------------------|
+| P0-1 | Crear rama o copia de respaldo del estado actual | Punto de restauración claro |
+| P0-2 | Inventariar `fetch(` hacia `amazonaws.com` en todos los HTML | Lista en notas o tabla al final de este plan |
+| P0-3 | Inventariar `innerHTML` con interpolación `${` de variables de API | Lista priorizada |
+| P0-4 | Ejecutar `run-security-scan.ps1` y guardar reportes como línea base | `semgrep-report.json` con 11 hallazgos |
+
+**Esfuerzo estimado:** bajo (1–2 horas).
+
+---
+
+### Fase 1 — Cambios de muy bajo riesgo
+
+Objetivo: cerrar **V-014**, **V-007** y parte de **V-005** sin afectar APIs ni login.
+
+| ID | Tarea concreta | Archivos |
+|----|----------------|----------|
+| V-014 | Eliminar la primera definición duplicada de `getAccessToken()`; dejar una función documentada que devuelva `access_token` o, si falta, `id_token` (comportamiento actual de la segunda definición) | `js/auth.js` |
+| V-007 | Copiar desde `index.html` el enlace Bootstrap con `integrity` y `crossorigin` al resto de páginas con CDN | `admin-empresas.html`, `admin-login.html`, `confirmar.html`, `dashboard.html`, `documentos.html`, `gestion-riesgos.html`, `login.html`, `matriz-riesgos.html`, `registro.html`, `superadmin-dashboard.html`, `vulnerabilidades.html` |
+| V-005 | Sustituir `innerHTML` + `error.message` por `textContent` o nodo de texto seguro | `superadmin-reportes.html`, `superadmin-controles.html`, `superadmin-controles-proveedores.html`, `matriz-riesgos.html`, `admin-empresas.html` (solo bloque de error en loading) |
+
+**Verificación Fase 1:**
+
+- [ ] Login y redirección a `dashboard.html` OK  
+- [ ] Semgrep: **0** hallazgos `missing-integrity`  
+- [ ] Pantallas superadmin cargan o muestran error legible sin romper layout  
+
+**Esfuerzo estimado:** bajo (medio día).
+
+---
+
+### Fase 2 — Utilidades y cabeceras de API
+
+Objetivo: cerrar **V-006** en el cliente y sentar base para **V-004**.
+
+| ID | Tarea concreta | Archivos |
+|----|----------------|----------|
+| V-006 | En `auth.js`, añadir `function authHeaders(extra = {})` que merge `Content-Type`, y si hay token `Authorization: Bearer …` | `js/auth.js` |
+| V-006 | En cada `fetch` a URL que contenga `execute-api` (o dominio API del proyecto), usar `headers: authHeaders()` o `authHeaders({ ... })` | Todos los HTML con `fetch` inventariados en P0-2 |
+| V-006 | Si respuesta `401`, redirigir a `login.html` o llamar `logout()` (comportamiento conservador) | Misma lista; probar al menos 2 pantallas |
+| V-004 (base) | Crear `js/utils.js` con `escapeHtml(text)` (mismo algoritmo que en `gestion-riesgos.html`) | `js/utils.js` nuevo |
+| V-004 (base) | Añadir `<script src="js/utils.js">` en páginas que aún no tengan `escapeHtml` local | Según inventario P0-3 |
+
+**Regla para no romper AWS:** no cambiar método HTTP, URL, query string ni cuerpo JSON; **solo** añadir cabeceras.
+
+**Verificación Fase 2:**
+
+- [ ] Con sesión válida: mismas pantallas cargan datos que antes  
+- [ ] Sin sesión: redirección o error controlado, no pantalla en blanco indefinida  
+- [ ] Inspección en DevTools: peticiones a API llevan `Authorization` cuando hay token  
+
+**Esfuerzo estimado:** medio (1–2 días).
+
+---
+
+### Fase 3 — XSS en datos de negocio (V-004)
+
+Objetivo: aplicar `escapeHtml()` a campos de texto que vienen de API en plantillas `innerHTML`.
+
+**Prioridad 1 (datos de usuario / administración):**
+
+| Archivo | Campos a escapar (ejemplos) |
+|---------|----------------------------|
+| `gestion-proveedores.html` | `nombre_empresa`, `nit`, `contacto_*`, textos en tarjetas |
+| `admin-empresas.html` | nombres de usuario, empresa, campos en listados |
+| `reportes.html` | textos dinámicos en grids y listas |
+| `gestion-controles.html` | títulos, descripciones en acordeón |
+| `modificar-proveedor.html` | nombres y labels dinámicos |
+
+**Prioridad 2:**
+
+| Archivo | Notas |
+|---------|--------|
+| `implementacion.html`, `capacitacion.html`, `auditoria.html`, `auditoria-proveedor.html`, `todo-en-uno.html`, `anadir-proveedor.html` | Misma regla en tarjetas de controles |
+| `superadmin-reportes.html`, `superadmin-controles.html` | Datos de empresa en tarjetas (errores ya en Fase 1) |
+
+**Pantallas que ya escapan:** unificar usando `utils.js` en lugar de función local duplicada (`gestion-riesgos.html`, `matriz-riesgos.html`, `vulnerabilidades.html`, `superadmin-controles-proveedores.html`).
+
+**Verificación Fase 3:**
+
+- [ ] Probar con datos normales: listas y fichas se ven igual  
+- [ ] Prueba manual opcional: si el API permite, dato con `<test>` en nombre no debe ejecutar script  
+- [ ] Revisión: no quedan `${variable_api}` sin `escapeHtml` en archivos Prioridad 1  
+
+**Esfuerzo estimado:** medio–alto (2–3 días según inventario).
+
+---
+
+### Fase 4 — Opcional: aligerar V-001 sin cambiar Cognito
+
+**Solo ejecutar si P0-5 confirma que `refresh_token` no se lee en ningún archivo.**
+
+| Tarea | Acción |
+|-------|--------|
+| P0-5 | Buscar en el proyecto: `getItem('refresh_token')`, `refresh_token` en `fetch` o renovación de sesión |
+| V-001 parcial | Si no hay uso: dejar de hacer `setItem('refresh_token', …)` y de eliminarlo en `logout()` se mantiene por higiene |
+
+**Si sí se usa:** omitir Fase 4 y dejar V-001 documentada para versión 2.0 del plan (con backend).
+
+---
+
+## 6. Inventario de referencia (para ejecutar P0-2 y P0-3)
+
+Lista inicial obtenida del análisis v1.0 (completar al ejecutar P0-2/P0-3 con `grep`).
+
+### HTML con `fetch` a APIs (añadir `authHeaders` en Fase 2)
+
+`vulnerabilidades.html`, `todo-en-uno.html`, `superadmin-reportes.html`, `superadmin-controles-proveedores.html`, `superadmin-controles.html`, `reportes.html`, `modificar-proveedor.html`, `matriz-riesgos.html`, `implementacion.html`, `gestion-riesgos.html`, `gestion-proveedores.html`, `gestion-controles.html`, `capacitacion.html`, `auditoria.html`, `auditoria-proveedor.html`, `anadir-proveedor.html`, `admin-empresas.html`, más `registro.html` y `auth.js` (`getEmpresaId`).
+
+### HTML con Bootstrap CDN sin SRI (Fase 1 — V-007)
+
+Los 11 listados en el informe; referencia de hash en `index.html`.
+
+### Fallback `empresa_id` / valor 8 (no tocar en v1.0 — V-003)
+
+`dashboard.html`, `reportes.html`, `modificar-proveedor.html`, `implementacion.html`, `gestion-proveedores.html`, `gestion-controles.html`, `gestion-riesgos.html`, `matriz-riesgos.html`, `capacitacion.html`, `auditoria.html`, `anadir-proveedor.html`.
+
+---
+
+## 7. Criterios de aceptación del plan completo v1.0
+
+El plan se considera **ejecutado con éxito** cuando:
+
+1. **Semgrep** reporta **0** hallazgos en la regla de integridad CDN (V-007 cerrado).  
+2. **Gitleaks** sigue en 0.  
+3. Existe **una** `getAccessToken()` en `auth.js` (V-014 cerrado).  
+4. Los **5 archivos** de error de V-005 no usan `innerHTML` con `error.message` sin escapar.  
+5. **Todos** los `fetch` del inventario P0-2 hacia API propia incluyen `authHeaders()` cuando el usuario tiene sesión (V-006 mitigado en front).  
+6. **Prioridad 1** de V-004 aplicada con `escapeHtml` en `utils.js`.  
+7. Prueba manual mínima (§5, Fases 1–3) documentada con fecha en `env-verificacion.txt` o nota breve al pie del informe.  
+8. **Informe de vulnerabilidades** actualizado a v1.1 con tabla “antes/después” y hallazgos cerrados.
+
+---
+
+## 8. Orden de trabajo recomendado (resumen)
+
+```text
+Fase 0  →  inventario + línea base Semgrep
+Fase 1  →  auth.js + SRI + errores seguros     [Semgrep 11 → 0]
+Fase 2  →  authHeaders + utils.js + todos fetch
+Fase 3  →  escapeHtml en pantallas prioritarias
+Fase 4  →  (opcional) refresh_token solo si no se usa
+```
+
+**No iniciar Fase 3 antes de Fase 2** (conviene tener `utils.js` y `auth.js` estables).
+
+---
+
+## 9. Riesgos de regresión y mitigación
+
+| Riesgo | Probabilidad | Mitigación en el plan |
+|--------|--------------|------------------------|
+| API rechaza petición con header nuevo | Baja | Si falla, revisar en DevTools; no cambiar URL ni body |
+| Escape rompe HTML legítimo | Baja | Solo escapar **texto** insertado, no estructura estática de plantilla |
+| SRI incorrecto y Bootstrap no carga | Baja | Copiar hash exacto de `index.html` (misma versión 5.3.8) |
+| Quitar `empresa_id = 8` deja demo vacía | Alta si se hiciera | **Excluido** de v1.0 |
+
+---
+
+## 10. Entregables tras la ejecución (cuando se apruebe)
+
+| Entregable | Ubicación |
+|------------|-----------|
+| Código mitigado | `Control-PrecISO-main/` |
+| Plan (este documento) | `security-analysis/PLAN_REMEDIACION.md` |
+| Informe actualizado | `security-analysis/INFORME_VULNERABILIDADES.md` v1.1 |
+| Evidencia Semgrep/Gitleaks | `security-analysis/semgrep-report.json`, `gitleaks-report.json` |
+| HTML imprimible del informe | Regenerar con `_build_informe_print_html.py` |
+
+---
+
+## 11. Siguiente versión del plan (futuro, no v1.0)
+
+Para cuando haya coordinación con el equipo o acceso a AWS:
+
+- V-003: eliminar fallback `8` y obligar `getEmpresaId()` o mensaje de error.  
+- V-001: diseño de sesión con cookies `HttpOnly` o BFF.  
+- V-002 / V-006: validación en API Gateway (authorizer JWT).  
+- V-009: CSP gradual (report-only primero).
+
+---
+
+**Fin del plan de remediación — versión 1.0**
+
+**Estado:** ejecutado el 20 de mayo de 2026. Ver `INFORME_EJECUCION_REMEDIACION_v2.md` e `INFORME_VULNERABILIDADES.md` v2.0.
+
+**Versión HTML:** `PLAN_REMEDIACION_print.html` (generar con `python _build_informe_print_html.py`).

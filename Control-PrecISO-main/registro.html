@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Registro - Control PrecISO</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 <link rel="stylesheet" href="styles.css">
 <style>
     .error-message {
@@ -176,6 +176,9 @@
 </div>
 
 <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/config.js"></script>
 <script>
     // Elementos del DOM
     const emailInput = document.getElementById('email');
@@ -241,12 +244,11 @@
         // Ajusta la URL según tu API Gateway
         const apiUrl = 'https://cf759ojbfj.execute-api.us-east-1.amazonaws.com/V1/empresas';
         
-        const response = await fetch(apiUrl, {
+        const response = await apiFetch(apiUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-            },
+            headers: authHeaders({
+                'Content-Type': 'application/json'
+            }),
             body: JSON.stringify({
                 ...datosEmpresa,
                 cognito_user_id: cognitoUserId,

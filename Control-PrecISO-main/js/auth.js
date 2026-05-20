@@ -1,10 +1,41 @@
 // js/auth.js
 // FUNCIONES PARA AUTENTICACIÓN CON COGNITO (API DIRECTA)
 
-// Función para iniciar sesión
+function getAccessToken() {
+    return localStorage.getItem('access_token') || localStorage.getItem('id_token');
+}
+
+function authHeaders(extraHeaders = {}) {
+    const headers = { ...extraHeaders };
+    const token = getAccessToken();
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
+function handleUnauthorized() {
+    logout();
+}
+
+/** Petición a API propia (API Gateway); añade token y gestiona 401. */
+async function apiFetch(url, options = {}) {
+    const opts = { ...options };
+    opts.headers = authHeaders(opts.headers || {});
+    const response = await fetch(url, opts);
+    if (response.status === 401) {
+        handleUnauthorized();
+    }
+    return response;
+}
+
+function isApiGatewayUrl(url) {
+    const u = String(url);
+    return u.includes('execute-api') || (u.includes('amazonaws.com') && !u.includes('cognito-idp'));
+}
+
 async function login(email, password) {
     try {
-        // Usar la API directa de Cognito, NO necesita dominio
         const response = await fetch(`https://cognito-idp.${COGNITO_CONFIG.region}.amazonaws.com/`, {
             method: 'POST',
             headers: {
@@ -24,8 +55,7 @@ async function login(email, password) {
         if (!response.ok) {
             const error = await response.json();
             console.error('Error response:', error);
-            
-            // Manejar diferentes tipos de errores
+
             if (error.message === 'User does not exist') {
                 throw new Error('El usuario no existe');
             } else if (error.message === 'Incorrect username or password') {
@@ -38,26 +68,23 @@ async function login(email, password) {
         }
 
         const data = await response.json();
-        
-        // Guardar el token en localStorage
+
         localStorage.setItem('access_token', data.AuthenticationResult.AccessToken);
         localStorage.setItem('id_token', data.AuthenticationResult.IdToken);
-        localStorage.setItem('refresh_token', data.AuthenticationResult.RefreshToken);
         localStorage.setItem('user_email', email);
-        
+
         return { success: true };
-        
+
     } catch (error) {
         console.error('Error en login:', error);
         return { success: false, error: error.message };
     }
 }
 
-// Función para verificar si el usuario está autenticado
 function isAuthenticated() {
     const token = localStorage.getItem('access_token');
     if (!token) return false;
-    
+
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const expirado = payload.exp * 1000 < Date.now();
@@ -67,7 +94,6 @@ function isAuthenticated() {
     }
 }
 
-// Función para cerrar sesión
 function logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('id_token');
@@ -76,20 +102,14 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Función para obtener el token (para enviar en peticiones a tu API)
-function getAccessToken() {
-    return localStorage.getItem('access_token');
-}
-
-// Función para obtener el email del usuario autenticado
 function getUserEmail() {
     return localStorage.getItem('user_email');
 }
-// Obtener el rol del usuario desde el token JWT
+
 function getUserRole() {
     const token = localStorage.getItem('id_token');
     if (!token) return null;
-    
+
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const groups = payload['cognito:groups'] || [];
@@ -103,35 +123,24 @@ function getUserRole() {
     }
 }
 
-
-// Obtener el ID de la empresa del usuario logueado
-// Función para obtener el token
-function getAccessToken() {
-    return localStorage.getItem('access_token') || localStorage.getItem('id_token');
-}
-
-// Obtener el ID de la empresa del usuario logueado
 async function getEmpresaId() {
     const token = getAccessToken();
     if (!token) {
         console.error('No hay token de acceso');
         return null;
     }
-    
+
     try {
-        const response = await fetch('https://cf759ojbfj.execute-api.us-east-1.amazonaws.com/V1/usuarios/empresa', {
+        const response = await apiFetch('https://cf759ojbfj.execute-api.us-east-1.amazonaws.com/V1/usuarios/empresa', {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         });
-        
+
         if (!response.ok) {
             console.error('Error al obtener empresa_id:', response.status);
             return null;
         }
-        
+
         const data = await response.json();
         console.log('Empresa ID recibido:', data.empresa_id);
         return data.empresa_id;

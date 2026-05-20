@@ -1,29 +1,45 @@
 # Control-PrecISO
 
-Repositorio de trabajo para **análisis de vulnerabilidades**, informes y **remediación** del front-end (HTML/JS) de Control-PrecISO.
+Aplicación web para gestión SGSI (ISO 27001) y análisis de seguridad del front-end.
 
-**Repositorio:** https://github.com/Jouless-dev/Control-PrecISO
+## Estructura del repositorio
 
-## Contenido
+| Carpeta | Contenido |
+|---------|-----------|
+| [`Control-PrecISO-main/`](Control-PrecISO-main/) | Aplicación HTML/JS/CSS (Cognito + API Gateway) |
+| [`security-analysis/`](security-analysis/) | Informes, plan de remediación, evidencias y HTML para entrega |
 
-| Carpeta | Descripción |
-|---------|-------------|
-| `Control-PrecISO-main/` | Código de la aplicación web (SGSI / ISO 27001) |
-| `security-analysis/` | Informes, plan de remediación, reportes Semgrep/Gitleaks |
+## Documentación de seguridad (entrega)
 
-## Para el equipo (integrar en su repo)
+Índice completo: **[`security-analysis/README.md`](security-analysis/README.md)**
 
-1. Clonar este repositorio o descargar ZIP desde GitHub.
-2. Revisar `security-analysis/INFORME_VULNERABILIDADES.md` y `PLAN_REMEDIACION.md`.
-3. Aplicar los cambios de mitigación en su rama (o copiar archivos modificados de `Control-PrecISO-main/`).
-4. Volver a ejecutar las herramientas en su entorno si lo requiere el curso.
+| Para presentar | Abrir en el navegador |
+|----------------|------------------------|
+| Informe final v2.0 | [`INFORME_VULNERABILIDADES_print.html`](security-analysis/INFORME_VULNERABILIDADES_print.html) |
+| Ejecución del plan | [`INFORME_EJECUCION_REMEDIACION_v2_print.html`](security-analysis/INFORME_EJECUCION_REMEDIACION_v2_print.html) |
+| Plan de remediación | [`PLAN_REMEDIACION_print.html`](security-analysis/PLAN_REMEDIACION_print.html) |
+| Informe inicial v1.0 | [`informes-historicos/INFORME_VULNERABILIDADES_v1.0.md`](security-analysis/informes-historicos/INFORME_VULNERABILIDADES_v1.0.md) |
 
-## Análisis de seguridad (local)
+**PDF:** en cada HTML → `Ctrl+P` → *Guardar como PDF*.
+
+## Resumen del trabajo realizado
+
+1. **Análisis v1.0** — Semgrep (11 SRI), revisión manual (V-001…V-014).
+2. **Plan y remediación** — SRI, `apiFetch`, `escapeHtml`, errores seguros, sin `refresh_token` en login.
+3. **Verificación v2.0** — Semgrep **0**, Gitleaks **0**; informes actualizados.
+
+## Herramientas
 
 ```powershell
-# Desde la raíz del repositorio
+# Análisis estático
 .\security-analysis\run-security-scan.ps1
+
+# Regenerar HTML imprimibles
+python security-analysis\_build_informe_print_html.py
 ```
 
-Guía detallada: `security-analysis/GUIA_EQUIPO_SEGURIDAD.md`  
-Requisitos: Git, Python 3.12+, Semgrep, Gitleaks (ver `security-analysis/env-verificacion.txt`).
+## Requisitos de desarrollo
+
+- Navegador moderno para probar la app
+- Cuenta/configuración AWS (Cognito, APIs) según `Control-PrecISO-main/js/config.js`
+- Para análisis: Git, Python 3.12+, Semgrep, Gitleaks (ver `security-analysis/env-verificacion.txt`)

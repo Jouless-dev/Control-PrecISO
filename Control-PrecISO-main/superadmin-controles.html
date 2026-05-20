@@ -77,6 +77,9 @@
         <div id="controlesContainer"></div>
     </div>
 
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <script>
 
         // endpoints
@@ -84,7 +87,7 @@
         
         async function cargarControles() {
             try {
-                const response = await fetch(API_CONTROLES);
+                const response = await apiFetch(API_CONTROLES);
                 const data = await response.json();
                 const controles = data.controles || [];
 
@@ -100,14 +103,14 @@
                             <span class="control-id">${control.id}</span>
                             <button class="btn" onclick="guardarControl('${control.id}')">💾 Guardar</button>
                         </div>
-                        <input type="text" id="titulo-${control.id}" class="control-titulo" value="${control.titulo || ''}">
-                        <textarea id="desc-${control.id}" class="control-descripcion" rows="3">${control.descripcion || ''}</textarea>
+                        <input type="text" id="titulo-${control.id}" class="control-titulo" value="${escapeHtml(control.titulo || '')}">
+                        <textarea id="desc-${control.id}" class="control-descripcion" rows="3">${escapeHtml(control.descripcion || '')}</textarea>
                     `;
                     container.appendChild(card);
                 });
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('loading').innerHTML = `<div style="color:#dc2626;">Error: ${error.message}</div>`;
+                showLoadError('loading', error.message);
             }
         }
 
@@ -125,9 +128,9 @@
             btn.disabled = true;
             
             try {
-                const response = await fetch(`${API_BASE}/controles/${controlId}`, {
+                const response = await apiFetch(`${API_BASE}/controles/${controlId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ titulo, descripcion })
                 });
                 

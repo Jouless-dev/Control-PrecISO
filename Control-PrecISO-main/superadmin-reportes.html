@@ -72,6 +72,9 @@
         <div id="reportesContainer"></div>
     </div>
 
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <script>
         const API_EMPRESAS = 'https://cf759ojbfj.execute-api.us-east-1.amazonaws.com/V1/empresas';
         const API_ESTADOS = 'https://ccgu3zrns1.execute-api.us-east-1.amazonaws.com/v1/estados';
@@ -79,7 +82,7 @@
 
         async function cargarReportes() {
             try {
-                const response = await fetch(API_EMPRESAS);
+                const response = await apiFetch(API_EMPRESAS);
                 const data = await response.json();
                 const empresas = data.empresas || [];
 
@@ -89,12 +92,12 @@
 
                 for (const emp of empresas) {
                     // Obtener controles seleccionados
-                    const controlesResp = await fetch(`${API_EMPRESA_CONTROLES}?empresa_id=${emp.id}`);
+                    const controlesResp = await apiFetch(`${API_EMPRESA_CONTROLES}?empresa_id=${emp.id}`);
                     const controlesData = await controlesResp.json();
                     const totalControles = controlesData.controles?.length || 0;
 
                     // Obtener estados
-                    const estadosResp = await fetch(`${API_ESTADOS}?empresa_id=${emp.id}`);
+                    const estadosResp = await apiFetch(`${API_ESTADOS}?empresa_id=${emp.id}`);
                     const estadosData = await estadosResp.json();
                     const estados = estadosData.estados || [];
                     const cumplen = estados.filter(e => e.estado_auditoria === 'cumple').length;
@@ -103,7 +106,7 @@
                     const card = document.createElement('div');
                     card.className = 'empresa-card';
                     card.innerHTML = `
-                        <div class="empresa-nombre">🏢 ${emp.nombre_empresa} (ID: ${emp.id})</div>
+                        <div class="empresa-nombre">🏢 ${escapeHtml(emp.nombre_empresa)} (ID: ${emp.id})</div>
                         <div class="stats">
                             <div class="stat">📊 Controles: ${totalControles}</div>
                             <div class="stat">✅ Cumplen: ${cumplen}</div>
@@ -115,7 +118,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('loading').innerHTML = `<div style="color:#dc2626;">Error: ${error.message}</div>`;
+                showLoadError('loading', error.message);
             }
         }
 

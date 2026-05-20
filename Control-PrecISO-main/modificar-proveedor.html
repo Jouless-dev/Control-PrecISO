@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <title>Modificar/Eliminar Proveedor - ISO 27001</title>
     <style>
         * {
@@ -456,7 +457,7 @@
 
         async function cargarProveedores() {
             try {
-                const response = await fetch(`${API_PROVEEDORES}?empresa_id=${EMPRESA_ID}`);
+                const response = await apiFetch(`${API_PROVEEDORES}?empresa_id=${EMPRESA_ID}`);
                 if (!response.ok) throw new Error('Error al cargar proveedores');
                 const data = await response.json();
                 proveedores = data.proveedores || [];
@@ -495,9 +496,9 @@
             };
 
             try {
-                const response = await fetch(`${API_PROVEEDORES}/${proveedorSeleccionado.id}`, {
+                const response = await apiFetch(`${API_PROVEEDORES}/${proveedorSeleccionado.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify(data)
                 });
 
@@ -524,9 +525,9 @@
             loadingEliminar.style.display = 'inline-block';
 
             try {
-                const response = await fetch(`${API_PROVEEDORES}/${proveedorSeleccionado.id}`, {
+                const response = await apiFetch(`${API_PROVEEDORES}/${proveedorSeleccionado.id}`, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders({ 'Content-Type': 'application/json' }),
                     body: JSON.stringify({ empresa_id: EMPRESA_ID })
                 });
 

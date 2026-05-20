@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <title>Proveedores y Terceros - ISO 27001</title>
     <style>
         * {
@@ -426,28 +427,28 @@
                 card.innerHTML = `
                     <div class="proveedor-header">
                         <div class="proveedor-icon">${getIcono(prov.tipo_proveedor)}</div>
-                        <div class="proveedor-nombre">${prov.nombre_empresa}</div>
+                        <div class="proveedor-nombre">${escapeHtml(prov.nombre_empresa)}</div>
                     </div>
                     <div class="proveedor-info">
                         <div class="info-item">
                             <span class="info-label">NIT:</span>
-                            <span class="info-value">${prov.nit}</span>
+                            <span class="info-value">${escapeHtml(prov.nit)}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Tipo:</span>
-                            <span class="info-value">${prov.tipo_proveedor}</span>
+                            <span class="info-value">${escapeHtml(prov.tipo_proveedor)}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Contacto:</span>
-                            <span class="info-value">${prov.contacto_nombre || 'N/A'}</span>
+                            <span class="info-value">${escapeHtml(prov.contacto_nombre || 'N/A')}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Email:</span>
-                            <span class="info-value">${prov.contacto_email || 'N/A'}</span>
+                            <span class="info-value">${escapeHtml(prov.contacto_email || 'N/A')}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Servicio:</span>
-                            <span class="info-value">${prov.servicio_contratado || 'N/A'}</span>
+                            <span class="info-value">${escapeHtml(prov.servicio_contratado || 'N/A')}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Riesgo:</span>
@@ -476,7 +477,7 @@
                 proveedoresContainer.style.display = 'none';
                 resumenDiv.style.display = 'none';
 
-                const response = await fetch(`${API_PROVEEDORES}?empresa_id=${EMPRESA_ID}`);
+                const response = await apiFetch(`${API_PROVEEDORES}?empresa_id=${EMPRESA_ID}`);
                 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);

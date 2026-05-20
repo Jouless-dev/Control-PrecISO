@@ -105,6 +105,9 @@
         <div id="controlesContainer"></div>
     </div>
 
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <script>
         const API_CONTROLES = 'https://lycd7kx0r2.execute-api.us-east-1.amazonaws.com/v1/controles';
         
@@ -115,7 +118,7 @@
 
         async function cargarControles() {
             try {
-                const response = await fetch(API_CONTROLES);
+                const response = await apiFetch(API_CONTROLES);
                 const data = await response.json();
                 const todosControles = data.controles || [];
                 
@@ -141,14 +144,8 @@
                 });
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('loading').innerHTML = `<div style="color:#dc2626;">Error: ${error.message}</div>`;
+                showLoadError('loading', error.message);
             }
-        }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
         
         async function guardarControl(controlId) {

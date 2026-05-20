@@ -1,58 +1,13 @@
-INFORME SEMGREP (UTF-8)
-Configs: auto + p/owasp-top-ten
-Total hallazgos: 11
+Semgrep scan — POST REMEDIACION (2026-05-20 14:09)
+Version: 1.163.0
+Config: auto + p/owasp-top-ten
 
-[1] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\admin-empresas.html:8
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
+Scan Summary:
+  Findings: 0
+  Rules run: 255
+  Targets scanned: 37
 
-[2] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\admin-login.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
+ANTES (informe v1.0): 11 hallazgos missing-integrity CDN
+DESPUES: 0 hallazgos
 
-[3] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\confirmar.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[4] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\dashboard.html:7
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[5] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\documentos.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[6] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\gestion-riesgos.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[7] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\login.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[8] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\matriz-riesgos.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[9] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\registro.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[10] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\superadmin-dashboard.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
-
-[11] html.security.audit.missing-integrity.missing-integrity
-    Severidad (Semgrep): WARNING
-    Archivo: Control-PrecISO-main\vulnerabilidades.html:5
-    Mensaje: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you�re telling the browser to fetch in the 'integrity
+Full JSON: semgrep-report.json

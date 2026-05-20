@@ -29,7 +29,7 @@ $lines | Set-Content -Encoding UTF8 (Join-Path $outDir "env-verificacion.txt")
 $lines | ForEach-Object { Write-Host $_ }
 
 if (-not (Test-Path (Join-Path $repoRoot ".git"))) {
-    Write-Warning "No hay carpeta .git. Ejecuta: git init (o clona el repo del equipo antes de escanear con Semgrep)."
+    Write-Warning "No hay carpeta .git. Inicializa el repo antes de escanear (Semgrep usa archivos rastreados por Git)."
     exit 1
 }
 
@@ -48,7 +48,5 @@ semgrep scan --config auto --config p/owasp-top-ten `
     --exclude dependency-check-tool `
     --json -o $semgrepJson | Tee-Object -FilePath $semgrepTxt
 
-Write-Host "`nListo. Revisa:" -ForegroundColor Green
-Write-Host "  - security-analysis/semgrep-report.json"
-Write-Host "  - security-analysis/semgrep-report.txt"
-Write-Host "  - security-analysis/gitleaks-report.json"
+Write-Host "`nListo. Siguiente paso:" -ForegroundColor Green
+Write-Host "  python security-analysis\_build_informe_print_html.py"
