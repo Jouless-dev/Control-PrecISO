@@ -57,7 +57,9 @@ La primera vez GitHub pedirá iniciar sesión (navegador o token personal).
 
 ## 3. Flujo de trabajo diario
 
-### 3.1 Crear rama (no trabajes en `main` directo)
+### 3.1 Rama de trabajo (opcional)
+
+Puedes trabajar en `main` en tu repo propio, o usar una rama:
 
 ```powershell
 cd "D:\Universidad\Control-PrecISO-main"
@@ -93,7 +95,7 @@ python _build_informe_print_html.py
 .\generar_pdf_PLAN_REMEDIACION.ps1
 ```
 
-### 3.5 Subir al repositorio
+### 3.5 Subir a tu GitHub
 
 ```powershell
 cd "D:\Universidad\Control-PrecISO-main"
@@ -101,10 +103,11 @@ git status
 git add Control-PrecISO-main/ security-analysis/
 git add -u
 git commit -m "Seguridad: mitigación V-00X y reportes Semgrep/Gitleaks actualizados"
-git push -u origin feature/remediacion-seguridad
+git push origin main
+# Si usas rama: git push -u origin feature/remediacion-seguridad
 ```
 
-Luego abre un **Merge Request / Pull Request** hacia `main` para que el equipo revise.
+Tus compañeros descargan desde: https://github.com/Jouless-dev/Control-PrecISO
 
 **No subas:** `dependency-check-tool/`, `dependency-check-dist.zip` (están en `.gitignore` de `security-analysis/`).
 
@@ -146,10 +149,20 @@ Si NVD devuelve error 429, solicita API key en https://nvd.nist.gov/developers/r
 
 ---
 
-## 7. Contacto con el equipo
+## 7. Configurar tu nombre en Git (una sola vez)
 
-Antes del primer push confirma:
+Si `git commit` pide identidad, ejecuta (con tu correo de GitHub):
 
-1. URL exacta del repositorio  
-2. Rama base (`main` / `master`)  
-3. Si usan GitLab: usuario y token o SSH configurado  
+```powershell
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu-email@ejemplo.com"
+```
+
+## 8. Mensaje para tus compañeros
+
+Pueden integrar tu trabajo así:
+
+```powershell
+git clone https://github.com/Jouless-dev/Control-PrecISO.git
+# Revisar security-analysis/ y copiar archivos mitigados a su repo GitLab
+```
