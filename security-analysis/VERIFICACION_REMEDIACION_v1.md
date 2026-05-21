@@ -4,7 +4,7 @@
 |---|---|
 | **Fecha** | 20 de mayo de 2026 |
 | **Plan ejecutado** | `PLAN_REMEDIACION.md` v1.0 |
-| **Estado** | Informes v2.0 generados (ver abajo) |
+| **Estado** | Informe **FINAL** generado (ver abajo) |
 
 ---
 
@@ -51,4 +51,6 @@ Evidencia: `semgrep-report.json`, `gitleaks-report.json`, `env-verificacion.txt`
 
 ---
 
-**Informes v2.0:** `INFORME_VULNERABILIDADES.md` (v2.0), `INFORME_EJECUCION_REMEDIACION_v2.md`, HTML en `*_print.html` (generar con `_build_informe_print_html.py`).
+**Informe de cierre:** `INFORME_VULNERABILIDADES_FINAL.md` — explica por qué Semgrep 11→0 (solo V-007 × 11 archivos). Índice: `INDICE_INFORMES.md`.
+
+**Corrida final SAST:** 20-may-2026 22:04 — 0 hallazgos, 42 archivos (incl. `Dockerfile`). Ver `env-verificacion.txt`.

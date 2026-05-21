@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Informe final de análisis de vulnerabilidades — Control-PrecISO</title>
+  <style>
+:root {
+  --ink: #1c2833;
+  --muted: #5d6d7e;
+  --accent: #1a5276;
+  --accent-light: #d4e6f1;
+  --border: #bdc3c7;
+  --paper: #ffffff;
+  --bg: #eceff1;
+}
+* { box-sizing: border-box; }
+html { font-size: 11pt; }
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--bg);
+  margin: 0;
+}
+.screen-toolbar {
+  max-width: 210mm;
+  margin: 10px auto 0;
+  padding: 8px 14px;
+  font-size: 9pt;
+  color: var(--muted);
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+.screen-toolbar kbd {
+  font-family: inherit;
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: #f8f9fa;
+}
+.document {
+  max-width: 210mm;
+  margin: 10px auto 32px;
+  background: var(--paper);
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+}
+.doc-cover {
+  padding: 22mm 20mm 18mm;
+  border-bottom: 3px solid var(--accent);
+  page-break-after: always;
+}
+.doc-cover .org-line {
+  font-size: 9pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6mm;
+}
+.doc-cover .doc-type {
+  display: inline-block;
+  font-size: 9pt;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 4px 10px;
+  margin-bottom: 8mm;
+}
+.doc-cover .doc-project {
+  font-size: 22pt;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0 0 4mm;
+  line-height: 1.15;
+}
+.doc-cover .doc-subtitle {
+  font-size: 13pt;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0 0 12mm;
+  line-height: 1.35;
+}
+.doc-cover table.meta-table {
+  width: 100%;
+  font-size: 10pt;
+  border-collapse: collapse;
+  margin: 0 0 14mm;
+}
+.doc-cover table.meta-table td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  vertical-align: top;
+}
+.doc-cover table.meta-table td:first-child {
+  width: 32%;
+  font-weight: 600;
+  background: #f4f6f7;
+  color: var(--accent);
+}
+.doc-cover .classification {
+  font-size: 9pt;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 6mm;
+  margin: 0;
+}
+.doc-body {
+  padding: 14mm 18mm 18mm;
+}
+.doc-body > h1:first-child { display: none; }
+.doc-body > table:first-of-type { display: none; }
+.doc-body > hr:first-of-type { display: none; }
+.doc-body h2 {
+  font-size: 12.5pt;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 1.4em 0 0.6em;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--accent-light);
+  page-break-after: avoid;
+}
+.doc-body h2::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 1em;
+  background: var(--accent);
+  margin-right: 8px;
+  vertical-align: -2px;
+}
+.doc-body h3 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 1.1em 0 0.4em;
+  page-break-after: avoid;
+}
+.doc-body h4 {
+  font-size: 10.5pt;
+  font-weight: 600;
+  margin: 0.9em 0 0.35em;
+}
+.doc-body p { margin: 0.45em 0 0.65em; text-align: justify; }
+.doc-body li { margin: 0.2em 0; }
+.doc-body ul, .doc-body ol { margin: 0.4em 0 0.8em; padding-left: 1.4em; }
+.doc-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  margin: 0.8em 0 1em;
+}
+.doc-body thead th {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+}
+.doc-body th, .doc-body td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  vertical-align: top;
+}
+.doc-body tr:nth-child(even) td { background: #fafbfc; }
+.doc-body code {
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: 0.9em;
+  background: #f4f6f7;
+  padding: 1px 5px;
+  border: 1px solid #e5e8e8;
+  border-radius: 2px;
+}
+.doc-body pre {
+  background: #f8f9fa;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  font-size: 8pt;
+  line-height: 1.4;
+  page-break-inside: avoid;
+  white-space: pre-wrap;
+}
+.doc-body pre code { border: none; background: none; padding: 0; }
+.doc-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5em 0;
+}
+.doc-body blockquote, .doc-body em.note {
+  font-size: 10pt;
+  color: var(--muted);
+}
+.doc-body strong { color: var(--ink); }
+.doc-print-footer {
+  margin-top: 14mm;
+  padding-top: 4mm;
+  border-top: 1px solid var(--border);
+  font-size: 8pt;
+  color: var(--muted);
+  text-align: center;
+}
+@media print {
+  body { background: #fff; }
+  .screen-only { display: none !important; }
+  .document { box-shadow: none; margin: 0; max-width: none; }
+  .doc-cover { padding-top: 15mm; }
+  .doc-body { padding: 0; }
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+  }
+  @page :first { margin-top: 12mm; }
+}
+</style>
+</head>
+<body>
+  <p class="screen-toolbar screen-only">
+    Exportar a PDF: <kbd>Ctrl+P</kbd> → <strong>Guardar como PDF</strong> · Formato A4 · Márgenes predeterminados
+  </p>
+  <div class="document">
+    
+    <header class="doc-cover">
+      <p class="org-line">Seguridad de la información · Evaluación de vulnerabilidades</p>
+      <div class="doc-type">INFORME TÉCNICO FINAL</div>
+      <h1 class="doc-project">Control-PrecISO</h1>
+      <p class="doc-subtitle">Análisis de vulnerabilidades — cierre del ciclo (remediación, 11→0, Docker)</p>
+      <table class="meta-table">
+
+<tbody>
+<tr>
+<td><strong>Proyecto</strong></td>
+<td>Control-PrecISO (aplicación web SGSI / ISO 27001)</td>
+</tr>
+<tr>
+<td><strong>Versión del informe</strong></td>
+<td><strong>FINAL</strong> (integra remediación, verificación y despliegue Docker)</td>
+</tr>
+<tr>
+<td><strong>Fecha</strong></td>
+<td>20 de mayo de 2026</td>
+</tr>
+<tr>
+<td><strong>Alcance</strong></td>
+<td>Código front-end, evidencias SAST/secrets, despliegue local containerizado</td>
+</tr>
+<tr>
+<td><strong>Referencias</strong></td>
+<td>Informe v1.0, Plan y ejecución de remediación, <code>DOCKER_SETUP.md</code></td>
+</tr>
+</tbody>
+</table>
+      <p class="classification">Documento académico — SGSI / ISO/IEC 27001</p>
+    </header>
+
+    <main class="doc-body">
+      <h2>1. Resumen ejecutivo</h2>
+<p>Se completó el ciclo de seguridad <strong>identificar → planificar → remediar → verificar → desplegar</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Fase</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Línea base (v1.0)</strong></td>
+<td>11 hallazgos Semgrep + 13 hallazgos manuales (V-001…V-014)</td>
+</tr>
+<tr>
+<td><strong>Remediación</strong></td>
+<td>Plan v1.0 ejecutado en front-end (sin cambiar AWS)</td>
+</tr>
+<tr>
+<td><strong>Verificación SAST</strong></td>
+<td>Semgrep <strong>0</strong> hallazgos, Gitleaks <strong>0</strong> fugas (corrida final 22:04)</td>
+</tr>
+<tr>
+<td><strong>Despliegue local</strong></td>
+<td>Docker + nginx en <code>http://localhost:8080</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Conclusión en una frase</h3>
+<p><strong>Semgrep pasó de 11 a 0 porque se corrigió un único tipo de problema repetido 11 veces (CDN sin SRI); no porque desaparecieron todas las vulnerabilidades del informe manual.</strong> Tras los controles del front-end, <strong>4 hallazgos quedaron cerrados, 3 mitigados y 6 siguen abiertos o parciales</strong>. El riesgo global bajó en el cliente, pero <strong>permanece medio–alto</strong> por sesión en <code>localStorage</code> y controles solo en navegador.</p>
+<hr />
+<h2>2. Aclaración obligatoria: ¿Por qué 11 → 0 en Semgrep?</h2>
+<p>Esta es la pregunta central para entender el informe con lógica académica.</p>
+<h3>2.1 Dos “universos” de hallazgos distintos</h3>
+<table>
+<thead>
+<tr>
+<th>Fuente</th>
+<th>¿Qué cuenta?</th>
+<th>v1.0</th>
+<th>FINAL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Semgrep</strong> (automático)</td>
+<td>Coincidencias de reglas en el código escaneado</td>
+<td><strong>11</strong></td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>Informe manual</strong> (OWASP / revisión)</td>
+<td>Riesgos de diseño y malas prácticas (V-001…V-014)</td>
+<td><strong>13 IDs</strong></td>
+<td><strong>Ver §5</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>No son lo mismo.</strong> En v1.0, los 11 de Semgrep <strong>no eran 11 vulnerabilidades diferentes</strong>.</p>
+<h3>2.2 Los 11 de Semgrep = una sola regla, once archivos</h3>
+<p>Todos los avisos iniciales correspondían a la <strong>misma regla</strong>: recurso Bootstrap cargado desde CDN <strong>sin atributo <code>integrity</code></strong> (Subresource Integrity, SRI).</p>
+<table>
+<thead>
+<tr>
+<th>Dato</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Regla / tipo</td>
+<td>CDN sin verificación de integridad</td>
+</tr>
+<tr>
+<td>ID en informe manual</td>
+<td><strong>V-007</strong> (un solo hallazgo de diseño)</td>
+</tr>
+<tr>
+<td>Repeticiones en código</td>
+<td><strong>11 archivos HTML</strong></td>
+</tr>
+<tr>
+<td>Lo que reporta Semgrep</td>
+<td>1 problema × 11 archivos = <strong>11 líneas en el reporte</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Controles que eliminaron los 11 avisos:</strong> Fase 1 del plan — añadir <code>integrity</code> y <code>crossorigin="anonymous"</code> al <code>&lt;link&gt;</code> de Bootstrap en cada HTML afectado.</p>
+<p>Por eso, al re-ejecutar Semgrep tras la remediación, el resultado es <strong>0</strong>: la regla ya no encuentra coincidencias. <strong>Eso solo demuestra el cierre de V-007 en la herramienta automática</strong>, no el cierre del inventario manual completo.</p>
+<h3>2.3 Lo que Semgrep NO detectó (y por eso 0 ≠ “sin riesgo”)</h3>
+<p>En v1.0, Semgrep <strong>no generó avisos</strong> para, entre otros:</p>
+<ul>
+<li>Tokens en <code>localStorage</code> (<strong>V-001</strong>)</li>
+<li>APIs sin cabecera <code>Authorization</code> (<strong>V-006</strong>)</li>
+<li>XSS por <code>innerHTML</code> con datos de API (<strong>V-004</strong>)</li>
+<li><code>empresa_id</code> por defecto (<strong>V-003</strong>)</li>
+<li>Autorización solo en cliente (<strong>V-002</strong>)</li>
+</ul>
+<p>Esos ítems salieron de <strong>revisión manual</strong> alineada a OWASP Top 10. El plan v1.0 atendió varios de ellos con cambios de código que <strong>las reglas Semgrep usadas no modelan</strong> o no alcanzaron a marcar.</p>
+<h3>2.4 Diagrama lógico</h3>
+<pre><code class="language-text">INFORME v1.0
+├── Semgrep: 11  ──►  Todos = V-007 (SRI) en 11 HTML
+│                      └── Control: integrity en Bootstrap  ──►  Semgrep FINAL: 0
+│
+└── Manual: 13 IDs (V-001…V-014)
+       ├── Cerrados con controles front-end: V-005, V-007, V-014, V-013
+       ├── Mitigados: V-004, V-006, V-001 (parcial)
+       └── Abiertos / sin cambio: V-001 residual, V-002, V-003, V-008…V-011
+</code></pre>
+<hr />
+<h2>3. Ciclo del proyecto y documentación (orden lógico)</h2>
+<table>
+<thead>
+<tr>
+<th>Orden</th>
+<th>Documento</th>
+<th>Rol en el ciclo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>informes-historicos/INFORME_VULNERABILIDADES_v1.0.md</code></td>
+<td><strong>Identificación</strong> — estado inicial</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>PLAN_REMEDIACION.md</code></td>
+<td><strong>Planificación</strong> — qué se va a corregir y qué no</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>INFORME_EJECUCION_REMEDIACION_v2.md</code></td>
+<td><strong>Implementación</strong> — qué se hizo en código</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>VERIFICACION_REMEDIACION_v1.md</code></td>
+<td><strong>Verificación técnica</strong> — Semgrep/Gitleaks</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong><code>INFORME_VULNERABILIDADES_FINAL.md</code> (este)</strong></td>
+<td><strong>Cierre</strong> — síntesis, matriz control–riesgo, Docker</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>INDICE_INFORMES.md</code></td>
+<td>Índice maestro de la carpeta</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Despliegue (entorno local):</strong> <code>docker-compose.yml</code>, <code>serve-docker.ps1</code>, <code>DOCKER_SETUP.md</code> en la raíz del repositorio.</p>
+<hr />
+<h2>4. Matriz de controles aplicados → vulnerabilidades</h2>
+<p>Cada control del plan se relaciona con uno o más IDs. Los que <strong>no</strong> tienen control en código siguen abiertos.</p>
+<table>
+<thead>
+<tr>
+<th>Control implementado</th>
+<th>Archivos / artefacto</th>
+<th>Vulnerabilidad</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SRI en Bootstrap CDN</td>
+<td>11+ HTML</td>
+<td><strong>V-007</strong></td>
+<td><strong>Cerrado</strong> — elimina los 11 avisos Semgrep</td>
+</tr>
+<tr>
+<td><code>showLoadError()</code></td>
+<td>5 HTML</td>
+<td><strong>V-005</strong></td>
+<td><strong>Cerrado</strong> — errores sin <code>innerHTML</code> peligroso</td>
+</tr>
+<tr>
+<td>Una sola <code>getAccessToken()</code></td>
+<td><code>js/auth.js</code></td>
+<td><strong>V-014</strong></td>
+<td><strong>Cerrado</strong></td>
+</tr>
+<tr>
+<td><code>apiFetch</code> + <code>authHeaders</code></td>
+<td><code>js/auth.js</code>, 18+ HTML</td>
+<td><strong>V-006</strong></td>
+<td><strong>Mitigado</strong> — token en APIs propias</td>
+</tr>
+<tr>
+<td><code>escapeHtml</code> centralizado</td>
+<td><code>js/utils.js</code>, pantallas P1/P2</td>
+<td><strong>V-004</strong></td>
+<td><strong>Mitigado</strong> — XSS reducido en listados</td>
+</tr>
+<tr>
+<td>No guardar <code>refresh_token</code></td>
+<td><code>js/auth.js</code></td>
+<td><strong>V-001</strong></td>
+<td><strong>Parcial</strong> — menor exposición de sesión</td>
+</tr>
+<tr>
+<td>Sin cambio en Cognito/URLs</td>
+<td>—</td>
+<td><strong>V-008, V-010, V-011</strong></td>
+<td><strong>Abierto</strong></td>
+</tr>
+<tr>
+<td>Sin validación servidor</td>
+<td>—</td>
+<td><strong>V-002, V-003</strong></td>
+<td><strong>Abierto</strong></td>
+</tr>
+<tr>
+<td>Sin CSP</td>
+<td>—</td>
+<td><strong>V-009</strong></td>
+<td><strong>Abierto</strong></td>
+</tr>
+<tr>
+<td>Gitleaks en CI/local</td>
+<td><code>gitleaks-report.json</code></td>
+<td><strong>V-013</strong></td>
+<td><strong>Cerrado</strong> (0 fugas)</td>
+</tr>
+<tr>
+<td><strong>Docker + nginx</strong></td>
+<td><code>Dockerfile</code>, <code>docker-compose.yml</code></td>
+<td><strong>Riesgo operativo</strong></td>
+<td><strong>Mejora</strong> — ver §6</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Estado final de cada hallazgo (informe manual)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Problema</th>
+<th>Gravedad</th>
+<th>Estado FINAL</th>
+<th>Relación con Semgrep 11→0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V-001</td>
+<td>Tokens en <code>localStorage</code></td>
+<td>Crítica</td>
+<td><strong>Parcial</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-002</td>
+<td>Rol solo en cliente</td>
+<td>Alta</td>
+<td><strong>Abierto</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-003</td>
+<td><code>empresa_id = 8</code> por defecto</td>
+<td>Alta</td>
+<td><strong>Abierto</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-004</td>
+<td>XSS / <code>innerHTML</code></td>
+<td>Alta</td>
+<td><strong>Mitigado</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-005</td>
+<td>Errores en DOM</td>
+<td>Media</td>
+<td><strong>Cerrado</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-006</td>
+<td>APIs sin <code>Authorization</code></td>
+<td>Alta</td>
+<td><strong>Mitigado</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-007</td>
+<td>CDN sin SRI</td>
+<td>Media</td>
+<td><strong>Cerrado</strong></td>
+<td><strong>Único origen de los 11 avisos</strong> → 0 tras SRI</td>
+</tr>
+<tr>
+<td>V-008</td>
+<td>Config expuesta</td>
+<td>Media</td>
+<td><strong>Abierto</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-009</td>
+<td>Sin CSP</td>
+<td>Media</td>
+<td><strong>Abierto</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-010</td>
+<td>Login contraseña en SPA</td>
+<td>Media</td>
+<td><strong>Abierto</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-011</td>
+<td>Sin 2FA en UI</td>
+<td>Baja</td>
+<td><strong>Abierto</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+<tr>
+<td>V-013</td>
+<td>Secretos en Git</td>
+<td>Info</td>
+<td><strong>Cerrado</strong></td>
+<td>Gitleaks 0 (independiente de Semgrep)</td>
+</tr>
+<tr>
+<td>V-014</td>
+<td>Código duplicado auth</td>
+<td>Baja</td>
+<td><strong>Cerrado</strong></td>
+<td>No medido por Semgrep</td>
+</tr>
+</tbody>
+</table>
+<h3>Resumen numérico honesto</h3>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hallazgos manuales inventariados</td>
+<td>13 IDs</td>
+</tr>
+<tr>
+<td><strong>Cerrados</strong></td>
+<td>4 (V-005, V-007, V-014, V-013)</td>
+</tr>
+<tr>
+<td><strong>Mitigados</strong></td>
+<td>3 (V-004, V-006, V-001 parcial)</td>
+</tr>
+<tr>
+<td><strong>Abiertos o parciales</strong></td>
+<td>6+ (V-001 residual, V-002, V-003, V-008–V-011)</td>
+</tr>
+<tr>
+<td>Avisos Semgrep v1.0</td>
+<td>11 (todos V-007)</td>
+</tr>
+<tr>
+<td>Avisos Semgrep FINAL</td>
+<td><strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Despliegue local con Docker (control de entorno)</h2>
+<p>No sustituye los controles de código, pero <strong>cierra el requisito de alojamiento local</strong> documentado para el proyecto.</p>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Imagen</td>
+<td><code>nginx:alpine</code> sirviendo <code>Control-PrecISO-main/</code></td>
+</tr>
+<tr>
+<td>Orquestación</td>
+<td><code>docker compose up</code> — puerto <strong>8080</strong></td>
+</tr>
+<tr>
+<td>Evidencia en SAST</td>
+<td>Semgrep FINAL escaneó también el <code>Dockerfile</code> (42 archivos Git) — <strong>0 hallazgos</strong></td>
+</tr>
+<tr>
+<td>Arquitectura</td>
+<td>Front en contenedor local; <strong>Cognito y API Gateway siguen en AWS</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Beneficio de seguridad operativa:</strong> entorno reproducible, sin depender de abrir archivos <code>file://</code>, y superficie de servicio acotada a nginx estático.</p>
+<hr />
+<h2>7. Metodología de la verificación FINAL</h2>
+<table>
+<thead>
+<tr>
+<th>Paso</th>
+<th>Herramienta / acción</th>
+<th>Resultado (20-may-2026, 22:04)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Código remediado según plan v1.0</td>
+<td>Ver <code>INFORME_EJECUCION_REMEDIACION_v2.md</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>semgrep scan</code> (auto + OWASP)</td>
+<td><strong>0</strong> hallazgos, 42 archivos, 260 reglas</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>gitleaks detect</code></td>
+<td><strong>0</strong> fugas</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Revisión manual + matriz §4</td>
+<td>Estados en §5</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Despliegue Docker verificado</td>
+<td>Contenedor <code>control-preciso-web</code></td>
+</tr>
+</tbody>
+</table>
+<p>Evidencias: <code>semgrep-report.json</code>, <code>gitleaks-report.json</code>, <code>env-verificacion.txt</code>.</p>
+<hr />
+<h2>8. Conclusión de seguridad FINAL</h2>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Valoración</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>¿Se entiende el 11→0?</td>
+<td>Sí: <strong>11 repeticiones de V-007</strong>, corregidas con SRI</td>
+</tr>
+<tr>
+<td>¿Quedó el sistema sin riesgo?</td>
+<td><strong>No</strong> — persisten V-001 (parcial), V-002, V-003 y otros</td>
+</tr>
+<tr>
+<td>¿Mejoró el front-end?</td>
+<td><strong>Sí</strong> — token en APIs, menos XSS, SRI, higiene auth</td>
+</tr>
+<tr>
+<td>¿Cumple ciclo SGSI / ISO 27001 académico?</td>
+<td><strong>Sí</strong> — evidencia de tratamiento de riesgos y verificación</td>
+</tr>
+<tr>
+<td>¿Listo para producción?</td>
+<td><strong>No</strong> sin backend, CSP y sesión fuera de <code>localStorage</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Evidencias y archivos</h2>
+<table>
+<thead>
+<tr>
+<th>Artefacto</th>
+<th>Ubicación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Informe FINAL (este)</td>
+<td><code>INFORME_VULNERABILIDADES_FINAL.md</code></td>
+</tr>
+<tr>
+<td>HTML imprimible</td>
+<td><code>INFORME_VULNERABILIDADES_FINAL_print.html</code></td>
+</tr>
+<tr>
+<td>Línea base v1.0</td>
+<td><code>informes-historicos/INFORME_VULNERABILIDADES_v1.0.md</code></td>
+</tr>
+<tr>
+<td>Post-remediación v2.0</td>
+<td><code>informes-historicos/INFORME_VULNERABILIDADES_v2.0.md</code></td>
+</tr>
+<tr>
+<td>Índice</td>
+<td><code>INDICE_INFORMES.md</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Fin del informe — versión FINAL</strong></p>
+      <footer class="doc-print-footer">
+        Control-PrecISO — INFORME TÉCNICO FINAL — Versión según metadatos del documento
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

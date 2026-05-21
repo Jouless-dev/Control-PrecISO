@@ -1,7 +1,10 @@
 # Informes históricos
 
-| Archivo | Fecha | Uso |
-|---------|-------|-----|
-| `INFORME_VULNERABILIDADES_v1.0.md` | 20 mayo 2026 | Línea base **antes** de la remediación en código |
+Versiones anteriores del análisis. **No sustituyen al informe FINAL.**
 
-El informe vigente (después de mitigar) es `../INFORME_VULNERABILIDADES.md` **versión 2.0**.
+| Archivo | Versión | Contenido |
+|---------|---------|-----------|
+| `INFORME_VULNERABILIDADES_v1.0.md` | 1.0 | Línea base **antes** de remediar |
+| `INFORME_VULNERABILIDADES_v2.0.md` | 2.0 | Post-remediación (sin sección ampliada 11→0 ni Docker) |
+
+**Vigente:** [`../INFORME_VULNERABILIDADES_FINAL.md`](../INFORME_VULNERABILIDADES_FINAL.md)

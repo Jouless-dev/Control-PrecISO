@@ -1,68 +1,50 @@
 # Análisis de seguridad — Control-PrecISO
 
-Documentación del ciclo **identificar → remediar → verificar** (SGSI / ISO 27001).
+Ciclo **identificar → planificar → remediar → verificar → desplegar** (SGSI / ISO 27001).
 
-## Entrega académica (orden recomendado)
+## Empieza aquí
 
-| # | Documento | Formato imprimible (PDF) |
-|---|-----------|--------------------------|
-| 1 | Línea base — Informe v1.0 | `informes-historicos/INFORME_VULNERABILIDADES_v1.0.md` |
-| 2 | Plan de remediación v1.0 | `PLAN_REMEDIACION_print.html` |
-| 3 | Ejecución del plan | `INFORME_EJECUCION_REMEDIACION_v2_print.html` |
-| 4 | **Informe final v2.0** (post-remediación) | `INFORME_VULNERABILIDADES_print.html` |
+**[`INDICE_INFORMES.md`](INDICE_INFORMES.md)** — orden de lectura y respuesta a *“¿por qué Semgrep pasó de 11 a 0?”*
 
-Abrir cada `*_print.html` en el navegador → **Ctrl+P** → *Guardar como PDF*.
+## Informe para entregar (FINAL)
 
-## Documentos actuales
+| | |
+|--|--|
+| **Markdown** | [`INFORME_VULNERABILIDADES_FINAL.md`](INFORME_VULNERABILIDADES_FINAL.md) |
+| **PDF** | Abrir [`INFORME_VULNERABILIDADES_FINAL_print.html`](INFORME_VULNERABILIDADES_FINAL_print.html) → Ctrl+P |
 
-| Archivo | Versión | Descripción |
-|---------|---------|-------------|
-| `INFORME_VULNERABILIDADES.md` | **2.0** | Estado de vulnerabilidades tras mitigar |
-| `INFORME_EJECUCION_REMEDIACION_v2.md` | 2.0 | Qué se aplicó del plan (fases 1–4) |
-| `PLAN_REMEDIACION.md` | 1.0 (ejecutado) | Medidas en código; sin cambios AWS |
-| `VERIFICACION_REMEDIACION_v1.md` | — | Resumen técnico Semgrep/Gitleaks |
-| `informes-historicos/INFORME_VULNERABILIDADES_v1.0.md` | 1.0 | Informe inicial (referencia) |
+El informe FINAL explica que los **11 avisos Semgrep eran el mismo problema (V-007) en 11 HTML**, no 11 vulnerabilidades distintas, y relaciona **cada control** con su hallazgo.
 
-## Evidencias de herramientas
+## Orden lógico de documentos
+
+```
+v1.0 (histórico)  →  PLAN  →  EJECUCIÓN  →  VERIFICACIÓN  →  INFORME FINAL + Docker
+```
+
+| # | Archivo |
+|---|---------|
+| 1 | `informes-historicos/INFORME_VULNERABILIDADES_v1.0.md` |
+| 2 | `PLAN_REMEDIACION.md` |
+| 3 | `INFORME_EJECUCION_REMEDIACION_v2.md` |
+| 4 | `VERIFICACION_REMEDIACION_v1.md` |
+| 5 | **`INFORME_VULNERABILIDADES_FINAL.md`** |
+
+## Evidencias
 
 | Archivo | Contenido |
 |---------|-----------|
-| `semgrep-report.json` / `.txt` | SAST (0 hallazgos tras remediación) |
-| `gitleaks-report.json` | Secretos en Git (0 fugas) |
-| `env-verificacion.txt` | Versiones de herramientas y resumen |
+| `semgrep-report.json` | 0 hallazgos (corrida final; incluye Dockerfile) |
+| `gitleaks-report.json` | 0 fugas |
+| `env-verificacion.txt` | Herramientas y fecha |
 
-## Código de la aplicación
+## Despliegue local (Docker)
 
-Mitigaciones en `../Control-PrecISO-main/`:
+En la raíz del repo: `serve-docker.ps1` → **http://localhost:8080**  
+Guía: [`../DOCKER_SETUP.md`](../DOCKER_SETUP.md)
 
-- `js/auth.js` — `apiFetch`, `authHeaders`, sin guardar `refresh_token`
-- `js/utils.js` — `escapeHtml`, `showLoadError`
-- HTML — SRI en Bootstrap, llamadas API con token
-
-## Regenerar informes HTML
-
-Desde la raíz del repositorio:
-
-```powershell
-python security-analysis\_build_informe_print_html.py
-```
-
-Genera: `INFORME_VULNERABILIDADES_print.html`, `PLAN_REMEDIACION_print.html`, `INFORME_EJECUCION_REMEDIACION_v2_print.html`.
-
-## Re-ejecutar análisis
+## Comandos
 
 ```powershell
 .\security-analysis\run-security-scan.ps1
+python security-analysis\_build_informe_print_html.py
 ```
-
-Requiere: Git, Python, Semgrep, Gitleaks (y Java si se usa Dependency-Check en el futuro).
-
-## Scripts internos (mantenimiento)
-
-| Script | Uso |
-|--------|-----|
-| `_build_informe_print_html.py` | Markdown → HTML formal |
-| `_apply_api_fetch.py` | Migración masiva `fetch` → `apiFetch` (ya aplicada) |
-| `_inject_scripts.py` | Inyección de `auth.js` / `utils.js` (ya aplicada) |
-
-No son necesarios para la entrega; se conservan como referencia del proceso.

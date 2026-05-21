@@ -9,9 +9,9 @@ import markdown
 ROOT = Path(__file__).resolve().parent
 
 DOC_META: dict[str, dict[str, str]] = {
-    "INFORME_VULNERABILIDADES.md": {
-        "tipo": "INFORME TÉCNICO",
-        "subtitulo": "Análisis de vulnerabilidades — versión 2.0 (post-remediación)",
+    "INFORME_VULNERABILIDADES_FINAL.md": {
+        "tipo": "INFORME TÉCNICO FINAL",
+        "subtitulo": "Análisis de vulnerabilidades — cierre del ciclo (remediación, 11→0, Docker)",
         "clasificacion": "Documento académico — SGSI / ISO/IEC 27001",
         "proyecto": "Control-PrecISO",
     },
@@ -338,9 +338,9 @@ def build_print_html(md_file: str, html_file: str, page_title: str) -> Path:
 if __name__ == "__main__":
     docs = [
         (
-            "INFORME_VULNERABILIDADES.md",
-            "INFORME_VULNERABILIDADES_print.html",
-            "Informe de análisis de vulnerabilidades — Control-PrecISO",
+            "INFORME_VULNERABILIDADES_FINAL.md",
+            "INFORME_VULNERABILIDADES_FINAL_print.html",
+            "Informe final de análisis de vulnerabilidades — Control-PrecISO",
         ),
         (
             "PLAN_REMEDIACION.md",

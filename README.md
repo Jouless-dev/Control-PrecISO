@@ -15,7 +15,8 @@ Aplicación web para gestión SGSI (ISO 27001) y análisis de seguridad del fron
 
 | Para presentar | Abrir en el navegador |
 |----------------|------------------------|
-| Informe final v2.0 | [`INFORME_VULNERABILIDADES_print.html`](security-analysis/INFORME_VULNERABILIDADES_print.html) |
+| **Informe final** (entregar) | [`INFORME_VULNERABILIDADES_FINAL_print.html`](security-analysis/INFORME_VULNERABILIDADES_FINAL_print.html) |
+| Índice de informes | [`security-analysis/INDICE_INFORMES.md`](security-analysis/INDICE_INFORMES.md) |
 | Ejecución del plan | [`INFORME_EJECUCION_REMEDIACION_v2_print.html`](security-analysis/INFORME_EJECUCION_REMEDIACION_v2_print.html) |
 | Plan de remediación | [`PLAN_REMEDIACION_print.html`](security-analysis/PLAN_REMEDIACION_print.html) |
 | Informe inicial v1.0 | [`informes-historicos/INFORME_VULNERABILIDADES_v1.0.md`](security-analysis/informes-historicos/INFORME_VULNERABILIDADES_v1.0.md) |
@@ -26,7 +27,8 @@ Aplicación web para gestión SGSI (ISO 27001) y análisis de seguridad del fron
 
 1. **Análisis v1.0** — Semgrep (11 SRI), revisión manual (V-001…V-014).
 2. **Plan y remediación** — SRI, `apiFetch`, `escapeHtml`, errores seguros, sin `refresh_token` en login.
-3. **Verificación v2.0** — Semgrep **0**, Gitleaks **0**; informes actualizados.
+3. **Verificación FINAL** — Semgrep **0** (11 avisos eran solo V-007/SRI en 11 HTML); informe FINAL con matriz control–vulnerabilidad.
+4. **Docker** — despliegue local nginx en puerto 8080.
 
 ## Despliegue local con Docker
 
