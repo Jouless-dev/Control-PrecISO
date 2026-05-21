@@ -28,6 +28,20 @@ Aplicación web para gestión SGSI (ISO 27001) y análisis de seguridad del fron
 2. **Plan y remediación** — SRI, `apiFetch`, `escapeHtml`, errores seguros, sin `refresh_token` en login.
 3. **Verificación v2.0** — Semgrep **0**, Gitleaks **0**; informes actualizados.
 
+## Despliegue local con Docker
+
+Requisito: **Docker Desktop** en ejecución (usa WSL2 + Ubuntu).
+
+```powershell
+.\serve-docker.ps1
+```
+
+Abrir: **http://localhost:8080** — Detener: `docker compose down`
+
+Login y APIs siguen en **AWS** (Cognito + API Gateway).
+
+Si Docker no arranca, ver [`DOCKER_SETUP.md`](DOCKER_SETUP.md).
+
 ## Herramientas
 
 ```powershell

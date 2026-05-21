@@ -1,0 +1,10 @@
+services:
+  web:
+    build:
+      context: ./Control-PrecISO-main
+      dockerfile: Dockerfile
+    image: control-preciso:local
+    container_name: control-preciso-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
