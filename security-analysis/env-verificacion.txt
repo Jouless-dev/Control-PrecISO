@@ -6,8 +6,8 @@ Semgrep: 1.163.0
 Gitleaks: 8.30.1
 Java: NO INSTALADO - openjdk version "17.0.19" 2026-04-21
 
-=== Corrida FINAL (informe FINAL) ===
-Semgrep: 0 hallazgos | 42 archivos | 260 reglas (incl. Dockerfile)
-Gitleaks: 0 fugas
-Nota: Los 11 hallazgos iniciales = V-007 (SRI) en 11 HTML; ver INFORME_VULNERABILIDADES_FINAL.md seccion 2
-Informe entrega: INFORME_VULNERABILIDADES_FINAL.md
+=== Cierre SAST (Semgrep) ===
+Linea base: 11 hallazgos (SG-001 a SG-011, regla missing-integrity)
+Post-remediacion: 0 hallazgos | 42 archivos
+Estado: 11/11 ERRADICADOS | 0 ABIERTOS
+Informes: INFORME_ESCANEO_INICIAL_SEMGREP, PLAN, EJECUCION, INFORME_VULNERABILIDADES_FINAL

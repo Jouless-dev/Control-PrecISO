@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Informe de ejecución del plan de remediación — Control-PrecISO</title>
+  <title>Informe de escaneo inicial SAST — Control-PrecISO</title>
   <style>
 :root {
   --ink: #1c2833;
@@ -223,9 +223,9 @@ body {
     
     <header class="doc-cover">
       <p class="org-line">Seguridad de la información · Evaluación de vulnerabilidades</p>
-      <div class="doc-type">INFORME DE EJECUCIÓN</div>
+      <div class="doc-type">INFORME DE ESCANEO</div>
       <h1 class="doc-project">Control-PrecISO</h1>
-      <p class="doc-subtitle">Cierre de remediación — 11/11 hallazgos erradicados</p>
+      <p class="doc-subtitle">Línea base SAST — 11 hallazgos (SG-001 a SG-011)</p>
       <table class="meta-table">
 <thead>
 <tr>
@@ -239,212 +239,223 @@ body {
 <td>Control-PrecISO</td>
 </tr>
 <tr>
-<td><strong>Plan de referencia</strong></td>
-<td><code>PLAN_REMEDIACION.md</code></td>
+<td><strong>Tipo de documento</strong></td>
+<td>Informe de resultados SAST — línea base</td>
 </tr>
 <tr>
-<td><strong>Hallazgos tratados</strong></td>
-<td>SG-001 a SG-011 (Semgrep)</td>
+<td><strong>Herramienta</strong></td>
+<td>Semgrep OSS 1.163.0</td>
 </tr>
 <tr>
-<td><strong>Fecha de ejecución</strong></td>
+<td><strong>Fecha del escaneo</strong></td>
 <td>Mayo 2026</td>
 </tr>
 <tr>
-<td><strong>Resultado</strong></td>
-<td><strong>11/11 hallazgos erradicados</strong></td>
+<td><strong>Alcance</strong></td>
+<td>Código fuente en <code>Control-PrecISO-main/</code> rastreado por Git</td>
+</tr>
+<tr>
+<td><strong>Reglas</strong></td>
+<td><code>auto</code> + <code>p/owasp-top-ten</code></td>
 </tr>
 </tbody>
 </table>
-      <p class="classification">Documento académico — Verificación SAST</p>
+      <p class="classification">Documento académico — Identificación</p>
     </header>
 
     <main class="doc-body">
       <h2>1. Resumen ejecutivo</h2>
-<p>Se ejecutó el plan de tratamiento derivado del <strong>escaneo SAST Semgrep</strong>. Se aplicó la corrección de <strong>Subresource Integrity (SRI)</strong> en los once archivos HTML reportados y se validó el cierre con <strong>re-escaneo: 0 hallazgos</strong>.</p>
+<p>Se ejecutó un <strong>análisis estático de seguridad (SAST)</strong> con Semgrep sobre el front-end del proyecto. El escaneo identificó <strong>11 hallazgos de seguridad</strong>, todos de la <strong>misma categoría</strong>: ausencia de <strong>Subresource Integrity (SRI)</strong> en recursos Bootstrap cargados desde CDN.</p>
 <table>
 <thead>
 <tr>
 <th>Indicador</th>
-<th>Antes</th>
-<th>Después</th>
+<th>Valor</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Hallazgos Semgrep</td>
-<td>11</td>
-<td><strong>0</strong></td>
+<td>Hallazgos totales</td>
+<td><strong>11</strong></td>
 </tr>
 <tr>
-<td>Hallazgos abiertos</td>
-<td>11</td>
-<td><strong>0</strong></td>
+<td>Críticos / Altos / Medios (Semgrep)</td>
+<td>Según severidad de regla: <strong>Media</strong></td>
 </tr>
 <tr>
-<td>Estado del tratamiento</td>
-<td>Pendiente</td>
-<td><strong>Cerrado al 100 %</strong></td>
+<td>Hallazgos distintos (tipos de regla)</td>
+<td><strong>1</strong> (repetido en 11 archivos)</td>
+</tr>
+<tr>
+<td>Estado al cierre de este informe</td>
+<td><strong>Abierto</strong> — pendiente de plan de remediación</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2>2. Acciones realizadas</h2>
-<h3>2.1 Remediación técnica (Fase 1)</h3>
-<p>En cada archivo SG-001…SG-011 se actualizó el <code>&lt;link&gt;</code> de Bootstrap 5.3.8 (jsDelivr) incorporando:</p>
-<ul>
-<li>Atributo <code>integrity</code> (hash SHA-384)</li>
-<li>Atributo <code>crossorigin="anonymous"</code></li>
-</ul>
-<p><strong>Referencia de implementación:</strong> mismo patrón que <code>index.html</code> (archivo sin hallazgo en línea base).</p>
-<h3>2.2 Verificación (Fases 2–3)</h3>
+<h2>2. Metodología (enfoque empresarial)</h2>
 <table>
 <thead>
 <tr>
+<th>Fase</th>
 <th>Actividad</th>
-<th>Resultado</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Prueba visual de pantallas (login, dashboard, gestión)</td>
-<td>Estilos Bootstrap cargan correctamente</td>
+<td><strong>Preparación</strong></td>
+<td>Inventario de repositorio; exclusión de <code>security-analysis/</code> y herramientas auxiliares</td>
 </tr>
 <tr>
-<td><code>.\security-analysis\run-security-scan.ps1</code></td>
-<td>Semgrep: <strong>0 hallazgos</strong></td>
+<td><strong>Ejecución</strong></td>
+<td><code>semgrep scan --config auto --config p/owasp-top-ten</code></td>
 </tr>
 <tr>
-<td>Gitleaks (complemento)</td>
-<td><strong>0 fugas</strong></td>
+<td><strong>Análisis</strong></td>
+<td>Clasificación por ID interno (SG-xxx), archivo y regla Semgrep</td>
+</tr>
+<tr>
+<td><strong>Reporte</strong></td>
+<td>Registro de hallazgos y trazabilidad hacia plan de tratamiento</td>
+</tr>
+<tr>
+<td><strong>Verificación posterior</strong></td>
+<td>Re-escaneo tras remediación (informe de cierre)</td>
 </tr>
 </tbody>
 </table>
-<h3>2.3 Despliegue local (complemento del proyecto)</h3>
-<p>Se documentó despliegue con <strong>Docker + nginx</strong> (<code>docker-compose.yml</code>, <code>serve-docker.ps1</code>) para servir el front-end en <code>http://localhost:8080</code>. No corresponde a un hallazgo Semgrep; es entorno de prueba reproducible.</p>
+<p><strong>Complemento:</strong> Gitleaks 8.30.1 — <strong>0 secretos</strong> detectados (no constituye hallazgo de vulnerabilidad en este registro).</p>
 <hr />
-<h2>3. Matriz de cierre de hallazgos</h2>
+<h2>3. Registro de hallazgos (Semgrep)</h2>
 <table>
 <thead>
 <tr>
 <th>ID</th>
+<th>Regla Semgrep</th>
+<th>Severidad</th>
 <th>Archivo</th>
-<th>Acción aplicada</th>
-<th>Re-escaneo</th>
-<th><strong>Estado final</strong></th>
+<th>Descripción</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>SG-001</td>
+<td><strong>SG-001</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>admin-empresas.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Etiqueta <code>&lt;link&gt;</code> a CDN sin atributo <code>integrity</code></td>
 </tr>
 <tr>
-<td>SG-002</td>
+<td><strong>SG-002</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>admin-login.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-003</td>
+<td><strong>SG-003</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>confirmar.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-004</td>
+<td><strong>SG-004</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>dashboard.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-005</td>
+<td><strong>SG-005</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>documentos.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-006</td>
+<td><strong>SG-006</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>gestion-riesgos.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-007</td>
+<td><strong>SG-007</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>login.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-008</td>
+<td><strong>SG-008</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>matriz-riesgos.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-009</td>
+<td><strong>SG-009</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>registro.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-010</td>
+<td><strong>SG-010</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>superadmin-dashboard.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 <tr>
-<td>SG-011</td>
+<td><strong>SG-011</strong></td>
+<td><code>html.security.audit.missing-integrity</code></td>
+<td>Media</td>
 <td><code>vulnerabilidades.html</code></td>
-<td>SRI Bootstrap</td>
-<td>Sin coincidencia</td>
-<td><strong>ERRADICADO</strong></td>
+<td>Idem</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Referencia OWASP:</strong> integridad de recursos de terceros (supply chain del cliente web).<br />
+<strong>Riesgo:</strong> si el CDN se compromete, podría servirse CSS/JS alterado al navegador del usuario.</p>
+<p><strong>Nota:</strong> <code>index.html</code> ya incluía SRI y <strong>no</strong> generó hallazgo.</p>
 <hr />
-<h2>4. Evidencias</h2>
+<h2>4. Resumen por severidad</h2>
 <table>
 <thead>
 <tr>
-<th>Artefacto</th>
-<th>Ubicación</th>
+<th>Severidad</th>
+<th>Cantidad</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Escaneo línea base (11 hallazgos)</td>
-<td><code>informes-historicos/semgrep-report-linea-base.json</code></td>
+<td>Media</td>
+<td>11</td>
 </tr>
 <tr>
-<td>Escaneo post-remediación (0)</td>
-<td><code>semgrep-report.json</code></td>
+<td>Alta</td>
+<td>0</td>
 </tr>
 <tr>
-<td>Entorno y fecha</td>
-<td><code>env-verificacion.txt</code></td>
+<td>Baja</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>11</strong></td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2>5. Conclusión</h2>
-<p>El plan de tratamiento se <strong>ejecutó en su totalidad</strong>. Los <strong>11 hallazgos</strong> identificados por Semgrep en la línea base quedan <strong>erradicados</strong> y <strong>cerrados</strong>, con evidencia de re-escaneo en <strong>cero coincidencias</strong>. No permanece ningún hallazgo abierto del alcance del ejercicio SAST.</p>
+<h2>5. Conclusión de la línea base</h2>
+<p>El proyecto presenta <strong>11 hallazgos abiertos</strong> detectados automáticamente, unificables en un <strong>único tratamiento técnico</strong> (implementar SRI en enlaces Bootstrap). Se recomienda ejecutar el <strong>Plan de remediación</strong> y validar con <strong>re-escaneo Semgrep</strong> hasta obtener <strong>0 hallazgos</strong>.</p>
+<p><strong>Evidencia:</strong> <code>informes-historicos/semgrep-report-linea-base.json</code> (export del escaneo inicial).</p>
 <hr />
-<p><strong>Fin del informe de ejecución</strong></p>
+<p><strong>Fin del informe de escaneo inicial</strong></p>
       <footer class="doc-print-footer">
-        Control-PrecISO — INFORME DE EJECUCIÓN — Versión según metadatos del documento
+        Control-PrecISO — INFORME DE ESCANEO — Versión según metadatos del documento
       </footer>
     </main>
   </div>

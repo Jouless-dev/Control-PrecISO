@@ -223,534 +223,267 @@ body {
     
     <header class="doc-cover">
       <p class="org-line">Seguridad de la información · Evaluación de vulnerabilidades</p>
-      <div class="doc-type">PLAN DE REMEDIACIÓN</div>
+      <div class="doc-type">PLAN DE TRATAMIENTO</div>
       <h1 class="doc-project">Control-PrecISO</h1>
-      <p class="doc-subtitle">Medidas correctivas en código fuente (front-end)</p>
+      <p class="doc-subtitle">Remediación de hallazgos Semgrep (SRI — 11 archivos HTML)</p>
       <table class="meta-table">
-
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
 <tbody>
 <tr>
 <td><strong>Proyecto</strong></td>
 <td>Control-PrecISO</td>
 </tr>
 <tr>
-<td><strong>Versión del plan</strong></td>
-<td>1.0</td>
-</tr>
-<tr>
-<td><strong>Fecha</strong></td>
-<td>20 de mayo de 2026</td>
-</tr>
-<tr>
 <td><strong>Documento base</strong></td>
-<td><code>INFORME_VULNERABILIDADES.md</code> v1.0</td>
+<td><code>informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md</code></td>
 </tr>
 <tr>
-<td><strong>Ámbito</strong></td>
-<td>Solo código en <code>Control-PrecISO-main/</code> (HTML, CSS, JavaScript)</td>
+<td><strong>Herramienta origen</strong></td>
+<td>Semgrep OSS 1.163.0</td>
+</tr>
+<tr>
+<td><strong>Hallazgos a tratar</strong></td>
+<td>SG-001 a SG-011 (11)</td>
+</tr>
+<tr>
+<td><strong>Fecha del plan</strong></td>
+<td>Mayo 2026</td>
+</tr>
+<tr>
+<td><strong>Estado</strong></td>
+<td><strong>Ejecutado y cerrado</strong></td>
 </tr>
 </tbody>
 </table>
-      <p class="classification">Documento académico — Gestión de riesgos</p>
+      <p class="classification">Documento académico — Gestión de vulnerabilidades</p>
     </header>
 
     <main class="doc-body">
-      <h2>1. Propósito</h2>
-<p>Definir <strong>qué cambios de código</strong> se pueden aplicar <strong>ahora</strong>, con la información disponible y <strong>sin coordinación con el equipo</strong>, para <strong>reducir el número y la gravedad</strong> de las vulnerabilidades del informe v1.0, manteniendo el comportamiento que hoy funciona contra <strong>Cognito y API Gateway en AWS</strong>.</p>
-<p>Este documento es la <strong>autorización de trabajo</strong>: no se modifica la aplicación hasta recibir confirmación explícita para ejecutar.</p>
-<hr />
-<h2>2. Principios (no romper lo que ya funciona)</h2>
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Principio</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>P1</td>
-<td><strong>No cambiar</strong> URLs de API, <code>COGNITO_CONFIG</code>, flujo de login ni tipo de autenticación (<code>USER_PASSWORD_AUTH</code>).</td>
-</tr>
-<tr>
-<td>P2</td>
-<td><strong>No eliminar</strong> el fallback <code>empresa_id = 8</code> en esta versión del plan (riesgo de pantallas vacías en demo; ver §6).</td>
-</tr>
-<tr>
-<td>P3</td>
-<td><strong>Solo añadir o endurecer</strong> salida HTML y cabeceras HTTP en <code>fetch</code> cuando ya exista sesión.</td>
-</tr>
-<tr>
-<td>P4</td>
-<td>Tras cada fase: prueba manual mínima (login → dashboard → una pantalla de gestión → una de superadmin si aplica).</td>
-</tr>
-<tr>
-<td>P5</td>
-<td>Tras cada fase: ejecutar <code>run-security-scan.ps1</code> y anotar resultados en <code>env-verificacion.txt</code>.</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2>3. Alcance y exclusiones</h2>
-<h3>3.1 Incluido en v1.0</h3>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Mitigación prevista en código</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>V-004</td>
-<td>Escape sistemático de datos en <code>innerHTML</code></td>
-</tr>
-<tr>
-<td>V-005</td>
-<td>Errores sin <code>innerHTML</code> inseguro</td>
-</tr>
-<tr>
-<td>V-006</td>
-<td>Cabecera <code>Authorization</code> en <code>fetch</code> a APIs propias</td>
-</tr>
-<tr>
-<td>V-007</td>
-<td>SRI en enlaces Bootstrap CDN (11 páginas)</td>
-</tr>
-<tr>
-<td>V-014</td>
-<td>Una sola función <code>getAccessToken()</code></td>
-</tr>
-<tr>
-<td>V-004 (refuerzo)</td>
-<td>Reutilizar patrón <code>escapeHtml</code> ya existente en 4 pantallas</td>
-</tr>
-</tbody>
-</table>
-<h3>3.2 Mitigación parcial (opcional en Fase 2)</h3>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Acción</th>
-<th>Motivo de “parcial”</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>V-001</td>
-<td>Dejar de guardar <code>refresh_token</code> <strong>solo si</strong> no se usa en ningún script</td>
-<td>Reduce impacto crítico sin cambiar Cognito; requiere verificación previa con <code>grep</code></td>
-</tr>
-</tbody>
-</table>
-<h3>3.3 Fuera de alcance v1.0 (no reduce conteo en Semgrep; requiere AWS o rediseño)</h3>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Motivo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>V-001 (completo)</td>
-<td>Sacar todos los tokens de <code>localStorage</code> implica cookies <code>HttpOnly</code> o backend intermedio</td>
-</tr>
-<tr>
-<td>V-002</td>
-<td>La autorización real debe validarse en servidor; en front solo se mantiene la UI actual</td>
-</tr>
-<tr>
-<td>V-003</td>
-<td>Quitar <code>empresa_id = 8</code> puede romper el flujo de demo sin confirmación del equipo</td>
-</tr>
-<tr>
-<td>V-008</td>
-<td>IDs y URLs públicos en SPA; ocultarlos no es viable solo con HTML estático</td>
-</tr>
-<tr>
-<td>V-009</td>
-<td>CSP estricta puede romper scripts inline en muchas páginas</td>
-</tr>
-<tr>
-<td>V-010, V-011</td>
-<td>Configuración en consola Cognito, no en este repositorio</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2>4. Resultado esperado (reducción de vulnerabilidades)</h2>
+      <h2>1. Objetivo</h2>
+<p><strong>Erradicar el 100 %</strong> de los hallazgos reportados por Semgrep en la línea base, mediante la implementación de <strong>Subresource Integrity (SRI)</strong> en todos los archivos HTML afectados, y <strong>verificar</strong> el cierre con un re-escaneo que reporte <strong>0 hallazgos</strong>.</p>
 <table>
 <thead>
 <tr>
 <th>Métrica</th>
-<th>Antes (informe v1.0)</th>
-<th>Objetivo tras plan v1.0</th>
+<th>Línea base</th>
+<th>Objetivo</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Hallazgos <strong>Semgrep</strong></td>
-<td>11 (CDN sin SRI)</td>
+<td>Hallazgos Semgrep</td>
+<td>11</td>
 <td><strong>0</strong></td>
 </tr>
 <tr>
-<td>Hallazgos <strong>Gitleaks</strong></td>
-<td>0</td>
-<td><strong>0</strong> (mantener)</td>
+<td>Hallazgos abiertos</td>
+<td>11</td>
+<td><strong>0</strong></td>
 </tr>
 <tr>
-<td><strong>V-007</strong></td>
-<td>Abierto</td>
-<td><strong>Cerrado</strong></td>
-</tr>
-<tr>
-<td><strong>V-005</strong></td>
-<td>Abierto</td>
-<td><strong>Cerrado</strong> (5 archivos)</td>
-</tr>
-<tr>
-<td><strong>V-014</strong></td>
-<td>Abierto</td>
-<td><strong>Cerrado</strong></td>
-</tr>
-<tr>
-<td><strong>V-006</strong></td>
-<td>Abierto</td>
-<td><strong>Mitigado en cliente</strong> (token enviado cuando hay sesión)*</td>
-</tr>
-<tr>
-<td><strong>V-004</strong></td>
-<td>Abierto</td>
-<td><strong>Mitigado</strong> en pantallas prioritarias; revisión manual del resto</td>
-</tr>
-<tr>
-<td><strong>V-001</strong></td>
-<td>Crítica abierta</td>
-<td><strong>Abierta</strong> o <strong>parcial</strong> (solo si Fase 2 opcional aplica)</td>
-</tr>
-<tr>
-<td><strong>V-003, V-002, V-008–V-011</strong></td>
-<td>Abiertos</td>
-<td>Documentados como limitación v1.0</td>
+<td>Tasa de cierre</td>
+<td>0 %</td>
+<td><strong>100 %</strong></td>
 </tr>
 </tbody>
 </table>
-<p>*Si el API Gateway ignora el header, la app sigue funcionando igual; si en el futuro exige token, el front ya cumple.</p>
-<p><strong>Resumen para exposición:</strong> el plan v1.0 ataca <strong>5 hallazgos de forma completa</strong> y <strong>refuerza 2 de alta gravedad</strong> (V-004, V-006) sin tocar la nube.</p>
 <hr />
-<h2>5. Fases de ejecución</h2>
-<h3>Fase 0 — Preparación (sin cambiar lógica de negocio)</h3>
+<h2>2. Alcance</h2>
 <table>
 <thead>
 <tr>
-<th>Tarea</th>
-<th>Descripción</th>
-<th>Criterio de hecho</th>
+<th>Incluido</th>
+<th>Excluido</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P0-1</td>
-<td>Crear rama o copia de respaldo del estado actual</td>
-<td>Punto de restauración claro</td>
+<td>Los 11 archivos HTML listados en el informe de escaneo</td>
+<td>Hallazgos no detectados por Semgrep en la línea base</td>
 </tr>
 <tr>
-<td>P0-2</td>
-<td>Inventariar <code>fetch(</code> hacia <code>amazonaws.com</code> en todos los HTML</td>
-<td>Lista en notas o tabla al final de este plan</td>
+<td>Atributos <code>integrity</code> y <code>crossorigin</code> en Bootstrap 5.3.8 CDN</td>
+<td>Cambios en AWS Cognito o API Gateway</td>
 </tr>
 <tr>
-<td>P0-3</td>
-<td>Inventariar <code>innerHTML</code> con interpolación <code>${</code> de variables de API</td>
-<td>Lista priorizada</td>
-</tr>
-<tr>
-<td>P0-4</td>
-<td>Ejecutar <code>run-security-scan.ps1</code> y guardar reportes como línea base</td>
-<td><code>semgrep-report.json</code> con 11 hallazgos</td>
+<td>Re-ejecución de <code>run-security-scan.ps1</code></td>
+<td>Nuevas reglas o herramientas fuera del alcance académico</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Esfuerzo estimado:</strong> bajo (1–2 horas).</p>
 <hr />
-<h3>Fase 1 — Cambios de muy bajo riesgo</h3>
-<p>Objetivo: cerrar <strong>V-014</strong>, <strong>V-007</strong> y parte de <strong>V-005</strong> sin afectar APIs ni login.</p>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Tarea concreta</th>
-<th>Archivos</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>V-014</td>
-<td>Eliminar la primera definición duplicada de <code>getAccessToken()</code>; dejar una función documentada que devuelva <code>access_token</code> o, si falta, <code>id_token</code> (comportamiento actual de la segunda definición)</td>
-<td><code>js/auth.js</code></td>
-</tr>
-<tr>
-<td>V-007</td>
-<td>Copiar desde <code>index.html</code> el enlace Bootstrap con <code>integrity</code> y <code>crossorigin</code> al resto de páginas con CDN</td>
-<td><code>admin-empresas.html</code>, <code>admin-login.html</code>, <code>confirmar.html</code>, <code>dashboard.html</code>, <code>documentos.html</code>, <code>gestion-riesgos.html</code>, <code>login.html</code>, <code>matriz-riesgos.html</code>, <code>registro.html</code>, <code>superadmin-dashboard.html</code>, <code>vulnerabilidades.html</code></td>
-</tr>
-<tr>
-<td>V-005</td>
-<td>Sustituir <code>innerHTML</code> + <code>error.message</code> por <code>textContent</code> o nodo de texto seguro</td>
-<td><code>superadmin-reportes.html</code>, <code>superadmin-controles.html</code>, <code>superadmin-controles-proveedores.html</code>, <code>matriz-riesgos.html</code>, <code>admin-empresas.html</code> (solo bloque de error en loading)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Verificación Fase 1:</strong></p>
-<ul>
-<li>[ ] Login y redirección a <code>dashboard.html</code> OK  </li>
-<li>[ ] Semgrep: <strong>0</strong> hallazgos <code>missing-integrity</code>  </li>
-<li>[ ] Pantallas superadmin cargan o muestran error legible sin romper layout  </li>
-</ul>
-<p><strong>Esfuerzo estimado:</strong> bajo (medio día).</p>
-<hr />
-<h3>Fase 2 — Utilidades y cabeceras de API</h3>
-<p>Objetivo: cerrar <strong>V-006</strong> en el cliente y sentar base para <strong>V-004</strong>.</p>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Tarea concreta</th>
-<th>Archivos</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>V-006</td>
-<td>En <code>auth.js</code>, añadir <code>function authHeaders(extra = {})</code> que merge <code>Content-Type</code>, y si hay token <code>Authorization: Bearer …</code></td>
-<td><code>js/auth.js</code></td>
-</tr>
-<tr>
-<td>V-006</td>
-<td>En cada <code>fetch</code> a URL que contenga <code>execute-api</code> (o dominio API del proyecto), usar <code>headers: authHeaders()</code> o <code>authHeaders({ ... })</code></td>
-<td>Todos los HTML con <code>fetch</code> inventariados en P0-2</td>
-</tr>
-<tr>
-<td>V-006</td>
-<td>Si respuesta <code>401</code>, redirigir a <code>login.html</code> o llamar <code>logout()</code> (comportamiento conservador)</td>
-<td>Misma lista; probar al menos 2 pantallas</td>
-</tr>
-<tr>
-<td>V-004 (base)</td>
-<td>Crear <code>js/utils.js</code> con <code>escapeHtml(text)</code> (mismo algoritmo que en <code>gestion-riesgos.html</code>)</td>
-<td><code>js/utils.js</code> nuevo</td>
-</tr>
-<tr>
-<td>V-004 (base)</td>
-<td>Añadir <code>&lt;script src="js/utils.js"&gt;</code> en páginas que aún no tengan <code>escapeHtml</code> local</td>
-<td>Según inventario P0-3</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Regla para no romper AWS:</strong> no cambiar método HTTP, URL, query string ni cuerpo JSON; <strong>solo</strong> añadir cabeceras.</p>
-<p><strong>Verificación Fase 2:</strong></p>
-<ul>
-<li>[ ] Con sesión válida: mismas pantallas cargan datos que antes  </li>
-<li>[ ] Sin sesión: redirección o error controlado, no pantalla en blanco indefinida  </li>
-<li>[ ] Inspección en DevTools: peticiones a API llevan <code>Authorization</code> cuando hay token  </li>
-</ul>
-<p><strong>Esfuerzo estimado:</strong> medio (1–2 días).</p>
-<hr />
-<h3>Fase 3 — XSS en datos de negocio (V-004)</h3>
-<p>Objetivo: aplicar <code>escapeHtml()</code> a campos de texto que vienen de API en plantillas <code>innerHTML</code>.</p>
-<p><strong>Prioridad 1 (datos de usuario / administración):</strong></p>
-<table>
-<thead>
-<tr>
-<th>Archivo</th>
-<th>Campos a escapar (ejemplos)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>gestion-proveedores.html</code></td>
-<td><code>nombre_empresa</code>, <code>nit</code>, <code>contacto_*</code>, textos en tarjetas</td>
-</tr>
-<tr>
-<td><code>admin-empresas.html</code></td>
-<td>nombres de usuario, empresa, campos en listados</td>
-</tr>
-<tr>
-<td><code>reportes.html</code></td>
-<td>textos dinámicos en grids y listas</td>
-</tr>
-<tr>
-<td><code>gestion-controles.html</code></td>
-<td>títulos, descripciones en acordeón</td>
-</tr>
-<tr>
-<td><code>modificar-proveedor.html</code></td>
-<td>nombres y labels dinámicos</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Prioridad 2:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Archivo</th>
-<th>Notas</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>implementacion.html</code>, <code>capacitacion.html</code>, <code>auditoria.html</code>, <code>auditoria-proveedor.html</code>, <code>todo-en-uno.html</code>, <code>anadir-proveedor.html</code></td>
-<td>Misma regla en tarjetas de controles</td>
-</tr>
-<tr>
-<td><code>superadmin-reportes.html</code>, <code>superadmin-controles.html</code></td>
-<td>Datos de empresa en tarjetas (errores ya en Fase 1)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Pantallas que ya escapan:</strong> unificar usando <code>utils.js</code> en lugar de función local duplicada (<code>gestion-riesgos.html</code>, <code>matriz-riesgos.html</code>, <code>vulnerabilidades.html</code>, <code>superadmin-controles-proveedores.html</code>).</p>
-<p><strong>Verificación Fase 3:</strong></p>
-<ul>
-<li>[ ] Probar con datos normales: listas y fichas se ven igual  </li>
-<li>[ ] Prueba manual opcional: si el API permite, dato con <code>&lt;test&gt;</code> en nombre no debe ejecutar script  </li>
-<li>[ ] Revisión: no quedan <code>${variable_api}</code> sin <code>escapeHtml</code> en archivos Prioridad 1  </li>
-</ul>
-<p><strong>Esfuerzo estimado:</strong> medio–alto (2–3 días según inventario).</p>
-<hr />
-<h3>Fase 4 — Opcional: aligerar V-001 sin cambiar Cognito</h3>
-<p><strong>Solo ejecutar si P0-5 confirma que <code>refresh_token</code> no se lee en ningún archivo.</strong></p>
-<table>
-<thead>
-<tr>
-<th>Tarea</th>
-<th>Acción</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>P0-5</td>
-<td>Buscar en el proyecto: <code>getItem('refresh_token')</code>, <code>refresh_token</code> en <code>fetch</code> o renovación de sesión</td>
-</tr>
-<tr>
-<td>V-001 parcial</td>
-<td>Si no hay uso: dejar de hacer <code>setItem('refresh_token', …)</code> y de eliminarlo en <code>logout()</code> se mantiene por higiene</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Si sí se usa:</strong> omitir Fase 4 y dejar V-001 documentada para versión 2.0 del plan (con backend).</p>
-<hr />
-<h2>6. Inventario de referencia (para ejecutar P0-2 y P0-3)</h2>
-<p>Lista inicial obtenida del análisis v1.0 (completar al ejecutar P0-2/P0-3 con <code>grep</code>).</p>
-<h3>HTML con <code>fetch</code> a APIs (añadir <code>authHeaders</code> en Fase 2)</h3>
-<p><code>vulnerabilidades.html</code>, <code>todo-en-uno.html</code>, <code>superadmin-reportes.html</code>, <code>superadmin-controles-proveedores.html</code>, <code>superadmin-controles.html</code>, <code>reportes.html</code>, <code>modificar-proveedor.html</code>, <code>matriz-riesgos.html</code>, <code>implementacion.html</code>, <code>gestion-riesgos.html</code>, <code>gestion-proveedores.html</code>, <code>gestion-controles.html</code>, <code>capacitacion.html</code>, <code>auditoria.html</code>, <code>auditoria-proveedor.html</code>, <code>anadir-proveedor.html</code>, <code>admin-empresas.html</code>, más <code>registro.html</code> y <code>auth.js</code> (<code>getEmpresaId</code>).</p>
-<h3>HTML con Bootstrap CDN sin SRI (Fase 1 — V-007)</h3>
-<p>Los 11 listados en el informe; referencia de hash en <code>index.html</code>.</p>
-<h3>Fallback <code>empresa_id</code> / valor 8 (no tocar en v1.0 — V-003)</h3>
-<p><code>dashboard.html</code>, <code>reportes.html</code>, <code>modificar-proveedor.html</code>, <code>implementacion.html</code>, <code>gestion-proveedores.html</code>, <code>gestion-controles.html</code>, <code>gestion-riesgos.html</code>, <code>matriz-riesgos.html</code>, <code>capacitacion.html</code>, <code>auditoria.html</code>, <code>anadir-proveedor.html</code>.</p>
-<hr />
-<h2>7. Criterios de aceptación del plan completo v1.0</h2>
-<p>El plan se considera <strong>ejecutado con éxito</strong> cuando:</p>
-<ol>
-<li><strong>Semgrep</strong> reporta <strong>0</strong> hallazgos en la regla de integridad CDN (V-007 cerrado).  </li>
-<li><strong>Gitleaks</strong> sigue en 0.  </li>
-<li>Existe <strong>una</strong> <code>getAccessToken()</code> en <code>auth.js</code> (V-014 cerrado).  </li>
-<li>Los <strong>5 archivos</strong> de error de V-005 no usan <code>innerHTML</code> con <code>error.message</code> sin escapar.  </li>
-<li><strong>Todos</strong> los <code>fetch</code> del inventario P0-2 hacia API propia incluyen <code>authHeaders()</code> cuando el usuario tiene sesión (V-006 mitigado en front).  </li>
-<li><strong>Prioridad 1</strong> de V-004 aplicada con <code>escapeHtml</code> en <code>utils.js</code>.  </li>
-<li>Prueba manual mínima (§5, Fases 1–3) documentada con fecha en <code>env-verificacion.txt</code> o nota breve al pie del informe.  </li>
-<li><strong>Informe de vulnerabilidades</strong> actualizado a v1.1 con tabla “antes/después” y hallazgos cerrados.</li>
-</ol>
-<hr />
-<h2>8. Orden de trabajo recomendado (resumen)</h2>
-<pre><code class="language-text">Fase 0  →  inventario + línea base Semgrep
-Fase 1  →  auth.js + SRI + errores seguros     [Semgrep 11 → 0]
-Fase 2  →  authHeaders + utils.js + todos fetch
-Fase 3  →  escapeHtml en pantallas prioritarias
-Fase 4  →  (opcional) refresh_token solo si no se usa
+<h2>3. Estrategia de remediación</h2>
+<p><strong>Tratamiento único replicable:</strong> copiar el patrón de enlace Bootstrap ya correcto en <code>index.html</code> hacia el resto de páginas con la misma dependencia CDN.</p>
+<pre><code class="language-html">&lt;link href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css&quot;
+      rel=&quot;stylesheet&quot;
+      integrity=&quot;sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB&quot;
+      crossorigin=&quot;anonymous&quot;&gt;
 </code></pre>
-<p><strong>No iniciar Fase 3 antes de Fase 2</strong> (conviene tener <code>utils.js</code> y <code>auth.js</code> estables).</p>
 <hr />
-<h2>9. Riesgos de regresión y mitigación</h2>
+<h2>4. Plan de acción por hallazgo</h2>
 <table>
 <thead>
 <tr>
-<th>Riesgo</th>
-<th>Probabilidad</th>
-<th>Mitigación en el plan</th>
+<th>ID</th>
+<th>Archivo</th>
+<th>Acción</th>
+<th>Responsable</th>
+<th>Estado planificado</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>API rechaza petición con header nuevo</td>
-<td>Baja</td>
-<td>Si falla, revisar en DevTools; no cambiar URL ni body</td>
+<td>SG-001</td>
+<td><code>admin-empresas.html</code></td>
+<td>Añadir SRI + <code>crossorigin</code></td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
 </tr>
 <tr>
-<td>Escape rompe HTML legítimo</td>
-<td>Baja</td>
-<td>Solo escapar <strong>texto</strong> insertado, no estructura estática de plantilla</td>
+<td>SG-002</td>
+<td><code>admin-login.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
 </tr>
 <tr>
-<td>SRI incorrecto y Bootstrap no carga</td>
-<td>Baja</td>
-<td>Copiar hash exacto de <code>index.html</code> (misma versión 5.3.8)</td>
+<td>SG-003</td>
+<td><code>confirmar.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
 </tr>
 <tr>
-<td>Quitar <code>empresa_id = 8</code> deja demo vacía</td>
-<td>Alta si se hiciera</td>
-<td><strong>Excluido</strong> de v1.0</td>
+<td>SG-004</td>
+<td><code>dashboard.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-005</td>
+<td><code>documentos.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-006</td>
+<td><code>gestion-riesgos.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-007</td>
+<td><code>login.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-008</td>
+<td><code>matriz-riesgos.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-009</td>
+<td><code>registro.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-010</td>
+<td><code>superadmin-dashboard.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
+</tr>
+<tr>
+<td>SG-011</td>
+<td><code>vulnerabilidades.html</code></td>
+<td>Idem</td>
+<td>Desarrollo</td>
+<td>Cerrar</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2>10. Entregables tras la ejecución (cuando se apruebe)</h2>
+<h2>5. Fases y cronograma</h2>
 <table>
 <thead>
 <tr>
-<th>Entregable</th>
-<th>Ubicación</th>
+<th>Fase</th>
+<th>Actividad</th>
+<th>Criterio de salida</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Código mitigado</td>
-<td><code>Control-PrecISO-main/</code></td>
+<td><strong>1</strong></td>
+<td>Aplicar SRI en los 11 HTML</td>
+<td>Código actualizado en repositorio</td>
 </tr>
 <tr>
-<td>Plan (este documento)</td>
-<td><code>security-analysis/PLAN_REMEDIACION.md</code></td>
+<td><strong>2</strong></td>
+<td>Prueba funcional (carga de estilos Bootstrap)</td>
+<td>Páginas renderizan correctamente</td>
 </tr>
 <tr>
-<td>Informe actualizado</td>
-<td><code>security-analysis/INFORME_VULNERABILIDADES.md</code> v1.1</td>
+<td><strong>3</strong></td>
+<td>Re-escaneo Semgrep</td>
+<td><strong>0 hallazgos</strong></td>
 </tr>
 <tr>
-<td>Evidencia Semgrep/Gitleaks</td>
-<td><code>security-analysis/semgrep-report.json</code>, <code>gitleaks-report.json</code></td>
-</tr>
-<tr>
-<td>HTML imprimible del informe</td>
-<td>Regenerar con <code>_build_informe_print_html.py</code></td>
+<td><strong>4</strong></td>
+<td>Informe de ejecución y cierre</td>
+<td>11/11 <strong>ERRADICADOS</strong></td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2>11. Siguiente versión del plan (futuro, no v1.0)</h2>
-<p>Para cuando haya coordinación con el equipo o acceso a AWS:</p>
-<ul>
-<li>V-003: eliminar fallback <code>8</code> y obligar <code>getEmpresaId()</code> o mensaje de error.  </li>
-<li>V-001: diseño de sesión con cookies <code>HttpOnly</code> o BFF.  </li>
-<li>V-002 / V-006: validación en API Gateway (authorizer JWT).  </li>
-<li>V-009: CSP gradual (report-only primero).</li>
-</ul>
+<h2>6. Verificación y criterios de aceptación</h2>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th>Método</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CA-1</td>
+<td><code>semgrep scan</code> (mismas reglas que línea base)</td>
+<td>0 findings</td>
+</tr>
+<tr>
+<td>CA-2</td>
+<td>Registro SG-001…SG-011</td>
+<td>Estado <strong>ERRADICADO</strong></td>
+</tr>
+<tr>
+<td>CA-3</td>
+<td>Evidencia archivada</td>
+<td><code>semgrep-report.json</code> actualizado</td>
+</tr>
+</tbody>
+</table>
 <hr />
-<p><strong>Fin del plan de remediación — versión 1.0</strong></p>
-<p><strong>Estado:</strong> ejecutado el 20 de mayo de 2026. Ver <code>INFORME_EJECUCION_REMEDIACION_v2.md</code> e <code>INFORME_VULNERABILIDADES.md</code> v2.0.</p>
-<p><strong>Versión HTML:</strong> <code>PLAN_REMEDIACION_print.html</code> (generar con <code>python _build_informe_print_html.py</code>).</p>
+<h2>7. Riesgos residuales del plan</h2>
+<p>Tras la ejecución completa de este plan, <strong>no quedan hallazgos Semgrep abiertos</strong> del alcance del escaneo inicial. Cualquier hallazgo futuro requerirá un <strong>nuevo ciclo</strong> de escaneo (nueva línea base).</p>
+<hr />
+<p><strong>Fin del plan de tratamiento</strong></p>
       <footer class="doc-print-footer">
-        Control-PrecISO — PLAN DE REMEDIACIÓN — Versión según metadatos del documento
+        Control-PrecISO — PLAN DE TRATAMIENTO — Versión según metadatos del documento
       </footer>
     </main>
   </div>

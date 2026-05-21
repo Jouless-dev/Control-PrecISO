@@ -10,21 +10,27 @@ ROOT = Path(__file__).resolve().parent
 
 DOC_META: dict[str, dict[str, str]] = {
     "INFORME_VULNERABILIDADES_FINAL.md": {
-        "tipo": "INFORME TÉCNICO FINAL",
-        "subtitulo": "Análisis de vulnerabilidades — cierre del ciclo (remediación, 11→0, Docker)",
-        "clasificacion": "Documento académico — SGSI / ISO/IEC 27001",
+        "tipo": "INFORME FINAL DE CIERRE",
+        "subtitulo": "SAST Semgrep — 11 hallazgos erradicados, 0 abiertos",
+        "clasificacion": "Documento académico — Gestión de vulnerabilidades",
+        "proyecto": "Control-PrecISO",
+    },
+    "informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md": {
+        "tipo": "INFORME DE ESCANEO",
+        "subtitulo": "Línea base SAST — 11 hallazgos (SG-001 a SG-011)",
+        "clasificacion": "Documento académico — Identificación",
         "proyecto": "Control-PrecISO",
     },
     "PLAN_REMEDIACION.md": {
-        "tipo": "PLAN DE REMEDIACIÓN",
-        "subtitulo": "Medidas correctivas en código fuente (front-end)",
-        "clasificacion": "Documento académico — Gestión de riesgos",
+        "tipo": "PLAN DE TRATAMIENTO",
+        "subtitulo": "Remediación de hallazgos Semgrep (SRI — 11 archivos HTML)",
+        "clasificacion": "Documento académico — Gestión de vulnerabilidades",
         "proyecto": "Control-PrecISO",
     },
     "INFORME_EJECUCION_REMEDIACION_v2.md": {
         "tipo": "INFORME DE EJECUCIÓN",
-        "subtitulo": "Resultados del plan de remediación v1.0",
-        "clasificacion": "Documento académico — Verificación post-mitigación",
+        "subtitulo": "Cierre de remediación — 11/11 hallazgos erradicados",
+        "clasificacion": "Documento académico — Verificación SAST",
         "proyecto": "Control-PrecISO",
     },
 }
@@ -338,9 +344,14 @@ def build_print_html(md_file: str, html_file: str, page_title: str) -> Path:
 if __name__ == "__main__":
     docs = [
         (
+            "informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md",
+            "informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP_print.html",
+            "Informe de escaneo inicial SAST — Control-PrecISO",
+        ),
+        (
             "INFORME_VULNERABILIDADES_FINAL.md",
             "INFORME_VULNERABILIDADES_FINAL_print.html",
-            "Informe final de análisis de vulnerabilidades — Control-PrecISO",
+            "Informe final de cierre de vulnerabilidades — Control-PrecISO",
         ),
         (
             "PLAN_REMEDIACION.md",

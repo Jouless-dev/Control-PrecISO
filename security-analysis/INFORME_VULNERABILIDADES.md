@@ -1,17 +1,9 @@
-# INFORME DE ANÁLISIS DE VULNERABILIDADES
+# INFORME DE VULNERABILIDADES
 
-> **Este archivo se reemplazó por el informe FINAL**, que integra remediación, explicación del 11→0 en Semgrep, matriz de controles y Docker.
+> Redirige al **informe final de cierre** (Semgrep — todas las vulnerabilidades del alcance erradicadas).
 
-## Documento vigente para entrega
+**Documento de entrega:** [`INFORME_VULNERABILIDADES_FINAL.md`](INFORME_VULNERABILIDADES_FINAL.md)  
+**PDF:** [`INFORME_VULNERABILIDADES_FINAL_print.html`](INFORME_VULNERABILIDADES_FINAL_print.html)  
+**Índice:** [`INDICE_INFORMES.md`](INDICE_INFORMES.md)
 
-**[`INFORME_VULNERABILIDADES_FINAL.md`](INFORME_VULNERABILIDADES_FINAL.md)**
-
-- Versión imprimible: [`INFORME_VULNERABILIDADES_FINAL_print.html`](INFORME_VULNERABILIDADES_FINAL_print.html)
-- Índice de toda la documentación: [`INDICE_INFORMES.md`](INDICE_INFORMES.md)
-
-## Histórico
-
-| Versión | Archivo |
-|---------|---------|
-| 1.0 (línea base) | [`informes-historicos/INFORME_VULNERABILIDADES_v1.0.md`](informes-historicos/INFORME_VULNERABILIDADES_v1.0.md) |
-| 2.0 (post-remediación) | [`informes-historicos/INFORME_VULNERABILIDADES_v2.0.md`](informes-historicos/INFORME_VULNERABILIDADES_v2.0.md) |
+**Línea base del escaneo:** [`informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md`](informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md)

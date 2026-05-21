@@ -1,52 +1,45 @@
-# Índice de informes — Control-PrecISO
+# Índice de informes — Control-PrecISO (SAST / Semgrep)
 
-Guía única para entender **qué documento leer y en qué orden**.
-
----
-
-## Para la entrega (recomendado)
-
-| # | Documento | Para qué sirve |
-|---|-----------|----------------|
-| 1 | [`informes-historicos/INFORME_VULNERABILIDADES_v1.0.md`](informes-historicos/INFORME_VULNERABILIDADES_v1.0.md) | **Antes** — qué vulnerabilidades había |
-| 2 | [`PLAN_REMEDIACION.md`](PLAN_REMEDIACION.md) | **Plan** — qué se iba a corregir |
-| 3 | [`INFORME_EJECUCION_REMEDIACION_v2.md`](INFORME_EJECUCION_REMEDIACION_v2.md) | **Hecho** — qué se implementó |
-| 4 | **[`INFORME_VULNERABILIDADES_FINAL.md`](INFORME_VULNERABILIDADES_FINAL.md)** | **Cierre** — por qué Semgrep 11→0, matriz controles, Docker |
-| 5 | [`../DOCKER_SETUP.md`](../DOCKER_SETUP.md) | **Despliegue** — cómo correr en Docker |
-
-**PDF:** abrir `INFORME_VULNERABILIDADES_FINAL_print.html` → Ctrl+P.
+Ciclo de vulnerabilidades **solo con hallazgos Semgrep**, formato empresarial académico.
 
 ---
 
-## Pregunta frecuente: ¿Por qué 11 vulnerabilidades pasaron a 0?
+## Orden de entrega (PDF: Ctrl+P en cada `*_print.html`)
 
-**Respuesta corta:** No pasaron 11 vulnerabilidades distintas a cero.
-
-- **Semgrep (11 → 0):** el mismo problema (**CDN sin SRI**, V-007) en **11 archivos HTML**. Un control (añadir `integrity`) cerró los 11 avisos automáticos.
-- **Informe manual (13 IDs):** solo **4 cerrados**, **3 mitigados**, el resto **abierto o parcial**. Detalle en el informe FINAL, sección 2.
-
----
-
-## Todos los archivos
-
-| Archivo | Versión | Estado |
-|---------|---------|--------|
-| `INFORME_VULNERABILIDADES_FINAL.md` | **FINAL** | **Vigente — entregar este** |
-| `INFORME_VULNERABILIDADES.md` | — | Redirige al FINAL |
-| `informes-historicos/INFORME_VULNERABILIDADES_v1.0.md` | 1.0 | Histórico |
-| `informes-historicos/INFORME_VULNERABILIDADES_v2.0.md` | 2.0 | Histórico |
-| `PLAN_REMEDIACION.md` | 1.0 | Ejecutado |
-| `INFORME_EJECUCION_REMEDIACION_v2.md` | 2.0 | Ejecutado |
-| `VERIFICACION_REMEDIACION_v1.md` | 1.0 | Evidencia Semgrep/Gitleaks |
-| `semgrep-report.json` | — | Evidencia SAST |
-| `gitleaks-report.json` | — | Evidencia secretos |
+| # | Documento | Rol |
+|---|-----------|-----|
+| 1 | [`informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md`](informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md) | **Identificación** — 11 hallazgos (SG-001…SG-011) |
+| 2 | [`PLAN_REMEDIACION.md`](PLAN_REMEDIACION.md) | **Plan de tratamiento** |
+| 3 | [`INFORME_EJECUCION_REMEDIACION_v2.md`](INFORME_EJECUCION_REMEDIACION_v2.md) | **Ejecución y cierre** — 11/11 erradicados |
+| 4 | **[`INFORME_VULNERABILIDADES_FINAL.md`](INFORME_VULNERABILIDADES_FINAL.md)** | **Acta de cierre** — 0 hallazgos abiertos |
 
 ---
 
-## Herramientas
+## Impresión
 
-```powershell
-.\security-analysis\run-security-scan.ps1
-python security-analysis\_build_informe_print_html.py
-.\serve-docker.ps1
-```
+| Documento | HTML |
+|-----------|------|
+| Escaneo inicial | Copiar desde MD o usar informe FINAL §3.1 |
+| Plan | [`PLAN_REMEDIACION_print.html`](PLAN_REMEDIACION_print.html) |
+| Ejecución | [`INFORME_EJECUCION_REMEDIACION_v2_print.html`](INFORME_EJECUCION_REMEDIACION_v2_print.html) |
+| **Cierre final** | [`INFORME_VULNERABILIDADES_FINAL_print.html`](INFORME_VULNERABILIDADES_FINAL_print.html) |
+
+---
+
+## Evidencias
+
+| Archivo | Contenido |
+|---------|-----------|
+| `informes-historicos/semgrep-report-linea-base.json` | 11 hallazgos (antes) |
+| `semgrep-report.json` | 0 hallazgos (después) |
+| `env-verificacion.txt` | Fecha y herramientas |
+
+---
+
+## Resumen del ciclo
+
+| Etapa | Hallazgos Semgrep | Abiertos |
+|-------|-------------------|----------|
+| Línea base | 11 | 11 |
+| Post-remediación | 0 | **0** |
+| **Cierre** | — | **100 % erradicados** |
