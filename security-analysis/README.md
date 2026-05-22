@@ -24,5 +24,16 @@ El informe incluye en un solo documento:
 
 ```powershell
 .\security-analysis\run-security-scan.ps1
-python security-analysis\_build_informe_print_html.py
 ```
+
+Al final debe decir: **`RESULTADO: 0 hallazgos`**.
+
+Si falla SSL al conectar con `semgrep.dev`, el script usa automáticamente reglas locales en `semgrep-rules/` (sin internet).
+
+Verificación manual:
+
+```powershell
+(Get-Content security-analysis\semgrep-report.json | ConvertFrom-Json).results.Count
+```
+
+Debe devolver **0**.

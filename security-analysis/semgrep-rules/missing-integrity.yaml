@@ -1,0 +1,31 @@
+# Regla local (sin descargar de semgrep.dev) — misma familia que el escaneo inicial
+# Fuente: semgrep-rules html/security/audit/missing-integrity.yaml
+rules:
+  - id: missing-integrity
+    languages:
+      - generic
+    paths:
+      include:
+        - "*.html"
+    severity: WARNING
+    message: >-
+      This tag is missing an 'integrity' subresource integrity attribute.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-353: Missing Support for Integrity Check"
+    patterns:
+      - pattern-either:
+          - pattern: <link ... href="$URL" ...>
+          - pattern: <link ... href='$URL' ...>
+          - pattern: <script ... src="$URL" ...>
+          - pattern: <script ... src='$URL' ...>
+      - metavariable-pattern:
+          metavariable: $URL
+          patterns:
+            - pattern-either:
+                - pattern: http://...
+                - pattern: https://...
+                - pattern: //...
+      - pattern-not-regex: (?is).*integrity=
+      - pattern-not-regex: (?is).*rel\s*=\s*['"]?preconnect
