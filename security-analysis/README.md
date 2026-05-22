@@ -1,27 +1,28 @@
-# Análisis de seguridad (SAST — Semgrep)
+# Análisis de seguridad — Control-PrecISO
 
-Gestión de vulnerabilidades detectadas por **Semgrep** — ciclo completo con **cierre al 100 %**.
+## Informe único de entrega
 
-## Entregar al profesor
+| | |
+|--|--|
+| **Documento** | [`INFORME_FINAL.md`](INFORME_FINAL.md) |
+| **PDF** | Abrir [`INFORME_FINAL_print.html`](INFORME_FINAL_print.html) → **Ctrl+P** |
 
-1. **Escaneo inicial** — `informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP.md`
-2. **Plan** — `PLAN_REMEDIACION_print.html`
-3. **Ejecución** — `INFORME_EJECUCION_REMEDIACION_v2_print.html`
-4. **Cierre final** — `INFORME_VULNERABILIDADES_FINAL_print.html`
+El informe incluye en un solo documento:
 
-Índice: [`INDICE_INFORMES.md`](INDICE_INFORMES.md)
+1. **Parte I** — Escaneo inicial Semgrep y tabla de vulnerabilidades (SG-001…SG-011)  
+2. **Parte II** — Plan de tratamiento  
+3. **Parte III** — Re-escaneo final y cierre (100 % erradicadas)
 
-## Resultado
+## Evidencias
 
-| | Línea base | Final |
-|--|------------|-------|
-| Hallazgos Semgrep | 11 | **0** |
-| Estado | Abiertos | **Todos erradicados (SG-001…SG-011)** |
+| Archivo | Uso |
+|---------|-----|
+| `informes-historicos/semgrep-report-linea-base.json` | 11 hallazgos (antes) |
+| `semgrep-report.json` | 0 hallazgos (después) |
 
 ## Comandos
 
 ```powershell
 .\security-analysis\run-security-scan.ps1
 python security-analysis\_build_informe_print_html.py
-.\serve-docker.ps1
 ```

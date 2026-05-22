@@ -7,23 +7,25 @@ Aplicación web para gestión SGSI (ISO 27001) y análisis de seguridad del fron
 | Carpeta | Contenido |
 |---------|-----------|
 | [`Control-PrecISO-main/`](Control-PrecISO-main/) | Aplicación HTML/JS/CSS (Cognito + API Gateway) |
-| [`security-analysis/`](security-analysis/) | Informes, plan de remediación, evidencias y HTML para entrega |
+| [`security-analysis/`](security-analysis/) | Informe final SAST (Semgrep) + evidencias JSON |
 
-## Documentación de seguridad (entrega SAST)
+## Informe de seguridad (entrega)
 
-Índice: **[`security-analysis/INDICE_INFORMES.md`](security-analysis/INDICE_INFORMES.md)**
+Un solo documento con escaneo inicial, plan de tratamiento y cierre:
 
-| # | Documento (PDF: Ctrl+P) |
-|---|-------------------------|
-| 1 | [`INFORME_ESCANEO_INICIAL_SEMGREP_print.html`](security-analysis/informes-historicos/INFORME_ESCANEO_INICIAL_SEMGREP_print.html) — 11 hallazgos |
-| 2 | [`PLAN_REMEDIACION_print.html`](security-analysis/PLAN_REMEDIACION_print.html) |
-| 3 | [`INFORME_EJECUCION_REMEDIACION_v2_print.html`](security-analysis/INFORME_EJECUCION_REMEDIACION_v2_print.html) |
-| 4 | [`INFORME_VULNERABILIDADES_FINAL_print.html`](security-analysis/INFORME_VULNERABILIDADES_FINAL_print.html) — **cierre: 0 abiertos** |
+**[`security-analysis/INFORME_FINAL_print.html`](security-analysis/INFORME_FINAL_print.html)** → Ctrl+P para PDF
 
-## Resumen
+- Parte I: 11 vulnerabilidades Semgrep (SG-001…SG-011)  
+- Parte II: Plan de tratamiento (SRI)  
+- Parte III: Re-escaneo **0 hallazgos** — **100 % erradicadas**
 
-- **Semgrep línea base:** 11 hallazgos (CDN sin SRI) → **tratados y erradicados** → re-escaneo **0**.
-- **Docker:** despliegue local en puerto 8080 (`serve-docker.ps1`).
+## Docker (despliegue local)
+
+```powershell
+.\serve-docker.ps1
+```
+
+→ http://localhost:8080
 
 ## Despliegue local con Docker
 
