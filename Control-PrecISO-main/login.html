@@ -72,7 +72,27 @@ form-action 'self';
 
 <script type="text/javascript" src="js/config.js"></script>
 <script type="text/javascript" src="js/auth.js"></script>
-<script type="text/javascript" src="js/utils.js"></script>
+
+<script>
+// Utilidades compartidas — mitigación XSS (V-004, V-005)
+function escapeHtml(text) {
+    if (text == null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+function showLoadError(elementId, message) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.textContent = '';
+    const div = document.createElement('div');
+    div.style.color = '#dc2626';
+    div.textContent = 'Error: ' + message;
+    el.appendChild(div);
+}
+</script>
+
 <script>
     // Esperar a que el DOM cargue
     document.addEventListener('DOMContentLoaded', function() {
