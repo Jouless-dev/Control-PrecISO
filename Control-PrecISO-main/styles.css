@@ -273,3 +273,20 @@ margin-bottom:8px;
         margin-bottom:20px;
     }
 }
+
+.error-message {
+    color: #dc2626;
+    background: #fee2e2;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    display: none;
+}
+.loading {
+    display: none;
+    margin-left: 10px;
+}
+.btn-loading {
+    opacity: 0.7;
+    cursor: wait;
+}
